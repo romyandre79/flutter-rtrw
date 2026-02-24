@@ -20,10 +20,7 @@ class ReportCubit extends Cubit<ReportState> {
 
     try {
       final data = await _reportRepository.getReportData(startDate, endDate);
-      final orders =
-          await _reportRepository.getOrdersByDateRange(startDate, endDate);
-
-      emit(ReportLoaded(data: data, orders: orders));
+      emit(ReportLoaded(data: data));
     } catch (e) {
       emit(ReportError(e.toString().replaceAll('Exception: ', '')));
     }
@@ -37,8 +34,7 @@ class ReportCubit extends Cubit<ReportState> {
     emit(const ReportExporting());
 
     try {
-      final filePath = await _exportService.exportOrdersToExcel(
-        currentState.orders,
+      final filePath = await _exportService.exportReportToExcel(
         currentState.data,
       );
 
@@ -47,38 +43,6 @@ class ReportCubit extends Cubit<ReportState> {
       emit(ReportExported(
         filePath: filePath,
         message: 'Laporan berhasil di-export',
-      ));
-
-      emit(currentState);
-    } catch (e) {
-      emit(ReportError(e.toString().replaceAll('Exception: ', '')));
-      emit(currentState);
-    }
-  }
-
-  /// Export Sales Detail
-  Future<void> exportSalesDetail() async {
-    final currentState = state;
-    if (currentState is! ReportLoaded) return;
-
-    emit(const ReportExporting());
-
-    try {
-      final orders = await _reportRepository.getOrdersWithItemsByDateRange(
-        currentState.data.startDate,
-        currentState.data.endDate,
-      );
-
-      final filePath = await _exportService.exportSalesDetailToExcel(
-        orders,
-        currentState.data,
-      );
-
-      await _exportService.shareFile(filePath);
-
-      emit(ReportExported(
-        filePath: filePath,
-        message: 'Laporan Penjualan (Detail) berhasil di-export',
       ));
 
       emit(currentState);

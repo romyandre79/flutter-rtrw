@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
-import 'package:flutter_pos/data/models/order.dart';
 import 'package:flutter_pos/core/services/store_print.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:flutter_thermal_printer/flutter_thermal_printer.dart' as ftp;
@@ -303,24 +302,7 @@ class PrinterService {
     return false;
   }
 
-  /// Print order receipt
-  Future<bool> printReceipt(Order order) async {
-    if (!await ensureConnected()) {
-      throw Exception('Printer tidak terhubung. Silakan hubungkan printer di Settings.');
-    }
 
-    try {
-      final bytes = await StorePrint.instance.printOrderReceipt(
-        order,
-        paperSize: getPaperSizeEnum(),
-        paperSizeMm: _paperSize,
-      );
-      
-      return await _printBytes(bytes);
-    } catch (e) {
-      throw Exception('Gagal mencetak: ${e.toString()}');
-    }
-  }
 
   /// Print test page
   Future<bool> printTest() async {

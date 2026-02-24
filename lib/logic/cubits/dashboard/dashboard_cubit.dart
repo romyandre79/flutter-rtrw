@@ -1,13 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_pos/data/repositories/payment_repository.dart';
+import 'package:flutter_pos/data/repositories/report_repository.dart';
 import 'package:flutter_pos/logic/cubits/dashboard/dashboard_state.dart';
 
 class DashboardCubit extends Cubit<DashboardState> {
-  final PaymentRepository _paymentRepository;
+  final ReportRepository _reportRepository;
 
   DashboardCubit({
-    PaymentRepository? paymentRepository,
-  })  : _paymentRepository = paymentRepository ?? PaymentRepository(),
+    ReportRepository? reportRepository,
+  })  : _reportRepository = reportRepository ?? ReportRepository(),
         super(const DashboardInitial());
 
   Future<void> loadDashboard() async {
@@ -15,8 +15,8 @@ class DashboardCubit extends Cubit<DashboardState> {
 
     try {
       final results = await Future.wait([
-        _paymentRepository.getTodayRevenue(),
-        _paymentRepository.getThisMonthOrderCount(),
+        _reportRepository.getTodayRevenue(),
+        _reportRepository.getThisMonthOrderCount(),
       ]);
 
       emit(DashboardLoaded(

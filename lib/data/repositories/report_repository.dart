@@ -1,6 +1,4 @@
 import 'package:flutter_pos/data/database/database_helper.dart';
-import 'package:flutter_pos/data/models/order.dart';
-import 'package:flutter_pos/data/models/order_item.dart';
 import 'package:flutter_pos/logic/cubits/report/report_state.dart';
 
 class ReportRepository {
@@ -8,26 +6,6 @@ class ReportRepository {
 
   ReportRepository({DatabaseHelper? databaseHelper})
       : _databaseHelper = databaseHelper ?? DatabaseHelper.instance;
-
-  /// Get orders within date range
-  Future<List<Order>> getOrdersByDateRange(
-    DateTime startDate,
-    DateTime endDate,
-  ) async {
-    final db = await _databaseHelper.database;
-
-    final start = DateTime(startDate.year, startDate.month, startDate.day);
-    final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
-
-    final result = await db.query(
-      'orders',
-      where: 'order_date BETWEEN ? AND ?',
-      whereArgs: [start.toIso8601String(), end.toIso8601String()],
-      orderBy: 'order_date DESC',
-    );
-
-    return result.map((map) => Order.fromMap(map)).toList();
-  }
 
   /// Get report data for date range
   Future<ReportData> getReportData(
@@ -67,18 +45,18 @@ class ReportRepository {
       GROUP BY status
     ''', [start.toIso8601String(), end.toIso8601String()]);
 
-    final ordersByStatus = <OrderStatus, int>{};
+    final ordersByStatus = <String, int>{};
     int completedOrders = 0;
     int pendingOrders = 0;
 
     for (final row in statusResult) {
-      final status = OrderStatusExtension.fromString(row['status'] as String);
+      final status = row['status'] as String;
       final count = row['count'] as int;
       ordersByStatus[status] = count;
 
-      if (status == OrderStatus.done) {
+      if (status == 'done') {
         completedOrders = count;
-      } else if (status != OrderStatus.done) {
+      } else {
         pendingOrders += count;
       }
     }
@@ -176,37 +154,35 @@ class ReportRepository {
     );
   }
 
-  /// Get orders with items for export
-  Future<List<Order>> getOrdersWithItemsByDateRange(
-    DateTime startDate,
-    DateTime endDate,
-  ) async {
+  /// Get today's revenue
+  Future<int> getTodayRevenue() async {
     final db = await _databaseHelper.database;
-    final start = DateTime(startDate.year, startDate.month, startDate.day);
-    final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
-    final orderMaps = await db.query(
-      'orders',
-      where: 'order_date BETWEEN ? AND ?',
-      whereArgs: [start.toIso8601String(), end.toIso8601String()],
-      orderBy: 'order_date DESC',
-    );
+    final result = await db.rawQuery('''
+      SELECT SUM(amount - COALESCE(change, 0)) as total
+      FROM payments
+      WHERE payment_date BETWEEN ? AND ?
+    ''', [startOfDay.toIso8601String(), endOfDay.toIso8601String()]);
 
-    final orders = <Order>[];
+    return (result.first['total'] as int?) ?? 0;
+  }
 
-    for (final map in orderMaps) {
-      final order = Order.fromMap(map);
-      
-      final itemMaps = await db.query(
-        'order_items',
-        where: 'order_id = ?',
-        whereArgs: [order.id],
-      );
+  /// Get this month's order count
+  Future<int> getThisMonthOrderCount() async {
+    final db = await _databaseHelper.database;
+    final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
 
-      final items = itemMaps.map((m) => OrderItem.fromMap(m)).toList();
-      orders.add(order.copyWith(items: items));
-    }
+    final result = await db.rawQuery('''
+      SELECT COUNT(*) as count
+      FROM orders
+      WHERE order_date BETWEEN ? AND ?
+    ''', [startOfMonth.toIso8601String(), endOfMonth.toIso8601String()]);
 
-    return orders;
+    return (result.first['count'] as int?) ?? 0;
   }
 }

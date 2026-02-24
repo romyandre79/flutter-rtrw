@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_pos/data/models/order.dart';
 
 class ReportData {
   final DateTime startDate;
@@ -10,10 +9,8 @@ class ReportData {
   final int totalRevenue;
   final int totalPaid;
   final int totalUnpaid;
-  // New fields for Purchasing and Profit
-  final int totalPurchases;
-  final int totalProfit; // Revenue - Purchases
-  final Map<OrderStatus, int> ordersByStatus;
+  final int totalProfit;
+  final Map<String, int> ordersByStatus;
   final List<DailyRevenue> dailyRevenue;
   final List<ServiceSummary> topServices;
 
@@ -26,7 +23,6 @@ class ReportData {
     required this.totalRevenue,
     required this.totalPaid,
     required this.totalUnpaid,
-    this.totalPurchases = 0,
     this.totalProfit = 0,
     required this.ordersByStatus,
     required this.dailyRevenue,
@@ -38,16 +34,14 @@ class DailyRevenue {
   final DateTime date;
   final int revenue;
   final int orderCount;
-  final int paid; // Pembayaran yang diterima pada tanggal ini
-  final int purchases; // Pembelian pada tanggal ini
-  final int profit; // revenue - purchases for this day
+  final int paid;
+  final int profit;
 
   DailyRevenue({
     required this.date,
     required this.revenue,
     required this.orderCount,
     this.paid = 0,
-    this.purchases = 0,
     this.profit = 0,
   });
 }
@@ -83,12 +77,11 @@ class ReportLoading extends ReportState {
 
 class ReportLoaded extends ReportState {
   final ReportData data;
-  final List<Order> orders;
 
-  const ReportLoaded({required this.data, required this.orders});
+  const ReportLoaded({required this.data});
 
   @override
-  List<Object?> get props => [data, orders];
+  List<Object?> get props => [data];
 }
 
 class ReportExporting extends ReportState {

@@ -1,0 +1,28 @@
+﻿Analyzing flutter-rtrw...                                       
+
+   info - 'Share' is deprecated and shouldn't be used. Use SharePlus instead - lib\data\services\database_service.dart:36:13 - deprecated_member_use
+   info - 'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead - lib\data\services\database_service.dart:36:19 - deprecated_member_use
+   info - The imported package 'bloc' isn't a dependency of the importing package - lib\logic\cubits\unit\unit_cubit.dart:1:8 - depend_on_referenced_packages
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:602:62 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:608:62 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:639:66 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:646:62 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:680:66 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:684:45 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:688:67 - use_build_context_synchronously
+   info - Parameter 'key' could be a super parameter - lib\presentation\screens\unit\unit_list_screen.dart:7:9 - use_super_parameters
+
+flutter : 11 issues found. (ran in 
+18.1s)
+At line:1 char:1
++ flutter analyze 2>&1 | Out-File 
+-FilePath C:\lara\www\flutter-rtrw\an 
+...
++ ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : 
+NotSpeci    fied: (11 issues found. 
+(ran in 18    .1s):String) [], 
+RemoteException
+    + FullyQualifiedErrorId : 
+NativeCo    mmandError
+ 

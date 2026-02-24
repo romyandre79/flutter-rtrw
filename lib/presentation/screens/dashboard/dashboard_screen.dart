@@ -166,14 +166,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildHeader(User? user, DashboardState state) {
-    int todayRevenue = 0;
-    int monthOrders = 0;
-
-    if (state is DashboardLoaded) {
-      todayRevenue = state.todayRevenue;
-      monthOrders = state.monthOrderCount;
-    }
-
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
@@ -274,49 +266,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildHeaderStatCard({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: AppRadius.mdRadius,
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: AppTypography.labelSmall.copyWith(
-                    color: Colors.white70,
-                    fontSize: 10,
-                  ),
-                ),
-                Text(
-                  value,
-                  style: AppTypography.titleMedium.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
+
 
   Widget _buildQuickActions() {
     return Column(

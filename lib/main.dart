@@ -19,7 +19,6 @@ import 'package:flutter_pos/data/repositories/unit_repository.dart';
 import 'package:flutter_pos/core/api/api_service.dart';
 import 'package:flutter_pos/core/services/notification_service.dart';
 import 'package:flutter_pos/core/services/sync_service.dart';
-import 'package:flutter_pos/data/repositories/payment_repository.dart';
 import 'package:flutter_pos/logic/sync/sync_cubit.dart';
 import 'package:flutter_pos/logic/cubits/unit/unit_cubit.dart';
 
@@ -63,7 +62,6 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(create: (_) => AuthRepository()),
         RepositoryProvider(create: (_) => ReportRepository()),
         RepositoryProvider(create: (_) => UserRepository()),
-        RepositoryProvider(create: (_) => PaymentRepository()),
         RepositoryProvider(create: (_) => UnitRepository()),
         RepositoryProvider(create: (_) => ApiService()),
         RepositoryProvider(
@@ -137,7 +135,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
-        // Show loading indicator while checking auth status
         if (state is AuthInitial || state is AuthLoading) {
           return Scaffold(
             backgroundColor: AppThemeColors.background,
@@ -169,12 +166,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
           );
         }
 
-        // Show main screen if authenticated
         if (state is AuthAuthenticated) {
           return MainScreen();
         }
 
-        // Show login screen if not authenticated
         return const LoginScreen();
       },
     );

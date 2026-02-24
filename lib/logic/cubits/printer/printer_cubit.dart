@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:flutter_pos_printer_platform/flutter_pos_printer_platform.dart'; // Removed
 import 'package:flutter_pos/core/services/printer_service.dart';
-import 'package:flutter_pos/data/models/order.dart';
 import 'package:flutter_pos/logic/cubits/printer/printer_state.dart';
 
 class PrinterCubit extends Cubit<PrinterState> {
@@ -39,12 +37,8 @@ class PrinterCubit extends Cubit<PrinterState> {
       final isBluetoothAvailable = await _printerService.isBluetoothAvailable();
       final paperSize = await _printerService.getSavedPaperSize();
       PrinterInfo? connectedDevice = _printerService.connectedDevice;
-      
-      // Determine what to scan
-      // PrinterService handles logic internally now.
 
-      // Initial emit
-       emit(PrinterDevicesLoaded(
+      emit(PrinterDevicesLoaded(
         devices: [..._scannedDevices],
         connectedDevice: connectedDevice,
         paperSize: paperSize,
@@ -52,11 +46,9 @@ class PrinterCubit extends Cubit<PrinterState> {
         savedPrinterMac: connectedDevice?.address,
       ));
 
-      // Start scanning
       _scanSubscription = _printerService.scanDevices().listen((devices) {
           _scannedDevices = devices;
-          // Emit update
-           emit(PrinterDevicesLoaded(
+          emit(PrinterDevicesLoaded(
             devices: [..._scannedDevices],
             connectedDevice: _printerService.connectedDevice,
             paperSize: paperSize,
@@ -73,7 +65,7 @@ class PrinterCubit extends Cubit<PrinterState> {
   }
 
   /// Connect to device
-  Future<void> connectDevice(PrinterInfo device) async { // Changed type to PrinterInfo
+  Future<void> connectDevice(PrinterInfo device) async {
     emit(PrinterConnecting(device.name));
 
     try {
@@ -104,26 +96,9 @@ class PrinterCubit extends Cubit<PrinterState> {
     }
   }
 
-  /// Print receipt
-  Future<void> printReceipt(Order order) async {
-    emit(const PrinterPrinting());
-
-    try {
-      final success = await _printerService.printReceipt(order);
-      if (success) {
-        emit(const PrinterPrintSuccess('Struk berhasil dicetak'));
-      } else {
-        emit(const PrinterError('Gagal mencetak struk'));
-      }
-    } catch (e) {
-      emit(PrinterError(e.toString().replaceAll('Exception: ', '')));
-    }
-  }
-
   /// Set paper size
   Future<void> setPaperSize(String size) async {
     await _printerService.setPaperSize(size);
-    // Refresh to update state
     if (state is PrinterDevicesLoaded) {
       final curr = state as PrinterDevicesLoaded;
       emit(PrinterDevicesLoaded(
