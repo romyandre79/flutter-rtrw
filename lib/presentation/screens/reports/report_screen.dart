@@ -91,7 +91,7 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         backgroundColor: AppThemeColors.background,
         body: Column(
@@ -135,7 +135,6 @@ class _ReportScreenState extends State<ReportScreen> {
                       return TabBarView(
                         children: [
                           _buildSalesTab(state.data),
-                          _buildPurchaseTab(state.data),
                           _buildProfitTab(state.data),
                         ],
                       );
@@ -231,12 +230,6 @@ class _ReportScreenState extends State<ReportScreen> {
                             case 'sales_detail':
                               context.read<ReportCubit>().exportSalesDetail();
                               break;
-                            case 'purchase_detail':
-                              context.read<ReportCubit>().exportPurchaseDetail();
-                              break;
-                            case 'stock':
-                              context.read<ReportCubit>().exportStockReport();
-                              break;
                           }
                         },
                         itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -260,26 +253,6 @@ class _ReportScreenState extends State<ReportScreen> {
                               ],
                             ),
                           ),
-                          const PopupMenuItem<String>(
-                            value: 'purchase_detail',
-                            child: Row(
-                              children: [
-                                Icon(Icons.inventory_2_outlined, color: AppThemeColors.textPrimary),
-                                SizedBox(width: AppSpacing.sm),
-                                Text('Detail Pembelian'),
-                              ],
-                            ),
-                          ),
-                          const PopupMenuItem<String>(
-                            value: 'stock',
-                            child: Row(
-                              children: [
-                                Icon(Icons.inventory, color: AppThemeColors.textPrimary),
-                                SizedBox(width: AppSpacing.sm),
-                                Text('Laporan Stok'),
-                              ],
-                            ),
-                          ),
                         ],
                       );
                     },
@@ -294,7 +267,6 @@ class _ReportScreenState extends State<ReportScreen> {
                 labelStyle: TextStyle(fontWeight: FontWeight.bold),
                 tabs: [
                   Tab(text: 'Penjualan'),
-                  Tab(text: 'Pembelian'),
                   Tab(text: 'Laba Rugi'),
                 ],
               ),
@@ -432,112 +404,7 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  Widget _buildPurchaseTab(ReportData data) {
-    return RefreshIndicator(
-      onRefresh: () async => _loadReport(),
-      color: AppThemeColors.primary,
-      child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          // Purchase Summary
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Ringkasan Pembelian',
-                style: AppTypography.titleMedium.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              _buildStatCard(
-                icon: Icons.shopping_cart_outlined,
-                label: 'Total Pembelian',
-                value: CurrencyFormatter.formatCompact(data.totalPurchases),
-                color: AppThemeColors.error,
-                fullWidth: true,
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xl),
 
-          // Purchase Chart
-          if (data.dailyRevenue.isNotEmpty)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Pembelian Harian',
-                  style: AppTypography.titleMedium.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Container(
-                  height: 200,
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: AppRadius.lgRadius,
-                    boxShadow: AppShadows.small,
-                  ),
-                  child: BarChart(
-                    BarChartData(
-                      barGroups: data.dailyRevenue.asMap().entries.map((entry) {
-                        return BarChartGroupData(
-                          x: entry.key,
-                          barRods: [
-                            BarChartRodData(
-                              toY: entry.value.purchases.toDouble(),
-                              color: AppThemeColors.error,
-                              width: data.dailyRevenue.length > 10 ? 8 : 16,
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(4),
-                              ),
-                            ),
-                          ],
-                        );
-                      }).toList(),
-                      titlesData: FlTitlesData(
-                        leftTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: data.dailyRevenue.length <= 7,
-                            getTitlesWidget: (value, meta) {
-                              final index = value.toInt();
-                              if (index >= 0 && index < data.dailyRevenue.length) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(top: 8),
-                                  child: Text(
-                                    '${data.dailyRevenue[index].date.day}',
-                                    style: AppTypography.labelSmall,
-                                  ),
-                                );
-                              }
-                              return const SizedBox.shrink();
-                            },
-                          ),
-                        ),
-                      ),
-                      borderData: FlBorderData(show: false),
-                      gridData: const FlGridData(show: false),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildProfitTab(ReportData data) {
     return RefreshIndicator(

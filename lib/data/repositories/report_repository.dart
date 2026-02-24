@@ -1,10 +1,6 @@
 import 'package:flutter_pos/data/database/database_helper.dart';
 import 'package:flutter_pos/data/models/order.dart';
 import 'package:flutter_pos/data/models/order_item.dart';
-import 'package:flutter_pos/data/models/purchase_order.dart';
-import 'package:flutter_pos/data/models/purchase_order_item.dart';
-import 'package:flutter_pos/data/models/supplier.dart';
-import 'package:flutter_pos/data/models/product.dart';
 import 'package:flutter_pos/logic/cubits/report/report_state.dart';
 
 class ReportRepository {
@@ -107,33 +103,10 @@ class ReportRepository {
       GROUP BY DATE(payment_date)
     ''', [start.toIso8601String(), end.toIso8601String()]);
 
-    final purchaseResult = await db.rawQuery('''
-      SELECT SUM(total_amount) as total_purchases
-      FROM purchase_orders
-      WHERE order_date BETWEEN ? AND ? AND status != 'cancelled'
-    ''', [start.toIso8601String(), end.toIso8601String()]);
-    
-    final totalPurchases = (purchaseResult.first['total_purchases'] as int?) ?? 0;
-
-    final dailyPurchaseResult = await db.rawQuery('''
-      SELECT 
-        DATE(order_date) as date,
-        SUM(total_amount) as purchases
-      FROM purchase_orders
-      WHERE order_date BETWEEN ? AND ? AND status != 'cancelled'
-      GROUP BY DATE(order_date)
-    ''', [start.toIso8601String(), end.toIso8601String()]);
-
     final dailyPayments = <String, int>{};
     for (final row in dailyPaymentResult) {
       final date = row['date'] as String;
       dailyPayments[date] = (row['paid'] as int?) ?? 0;
-    }
-
-    final dailyPurchases = <String, int>{};
-    for (final row in dailyPurchaseResult) {
-      final date = row['date'] as String;
-      dailyPurchases[date] = (row['purchases'] as int?) ?? 0;
     }
 
     final dailyDataMap = <String, DailyRevenue>{};
@@ -146,8 +119,7 @@ class ReportRepository {
         revenue: revenue,
         orderCount: (row['order_count'] as int?) ?? 0,
         paid: dailyPayments[dateStr] ?? 0,
-        purchases: dailyPurchases[dateStr] ?? 0,
-        profit: revenue - (dailyPurchases[dateStr] ?? 0),
+        profit: revenue,
       );
     }
 
@@ -158,21 +130,6 @@ class ReportRepository {
           revenue: 0,
           orderCount: 0,
           paid: entry.value,
-          purchases: dailyPurchases[entry.key] ?? 0,
-          profit: 0 - (dailyPurchases[entry.key] ?? 0),
-        );
-      }
-    }
-
-    for (final entry in dailyPurchases.entries) {
-      if (!dailyDataMap.containsKey(entry.key)) {
-        dailyDataMap[entry.key] = DailyRevenue(
-          date: DateTime.parse(entry.key),
-          revenue: 0,
-          orderCount: 0,
-          paid: dailyPayments[entry.key] ?? 0,
-          purchases: entry.value,
-          profit: 0 - entry.value,
         );
       }
     }
@@ -212,8 +169,7 @@ class ReportRepository {
       totalRevenue: totalRevenue,
       totalPaid: totalPaid,
       totalUnpaid: totalRevenue - totalPaid,
-      totalPurchases: totalPurchases,
-      totalProfit: totalRevenue - totalPurchases,
+      totalProfit: totalRevenue,
       ordersByStatus: ordersByStatus,
       dailyRevenue: dailyRevenue,
       topServices: topServices,
@@ -252,57 +208,5 @@ class ReportRepository {
     }
 
     return orders;
-  }
-
-  /// Get purchase orders with items for export
-  Future<List<PurchaseOrder>> getPurchasesWithItemsByDateRange(
-    DateTime startDate,
-    DateTime endDate,
-  ) async {
-    final db = await _databaseHelper.database;
-    final start = DateTime(startDate.year, startDate.month, startDate.day);
-    final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
-
-    final purchaseMaps = await db.query(
-      'purchase_orders',
-      where: 'order_date BETWEEN ? AND ? AND status != ?',
-      whereArgs: [start.toIso8601String(), end.toIso8601String(), 'cancelled'],
-      orderBy: 'order_date DESC',
-    );
-
-    final purchases = <PurchaseOrder>[];
-
-    for (final map in purchaseMaps) {
-      var purchase = PurchaseOrder.fromMap(map);
-      
-      final supplierMaps = await db.query(
-        'suppliers',
-        where: 'id = ?',
-        whereArgs: [purchase.supplierId],
-      );
-      
-      if (supplierMaps.isNotEmpty) {
-        final supplier = Supplier.fromMap(supplierMaps.first);
-        purchase = purchase.copyWith(supplier: supplier);
-      }
-
-      final itemMaps = await db.query(
-        'purchase_order_items',
-        where: 'purchase_order_id = ?',
-        whereArgs: [purchase.id],
-      );
-
-      final items = itemMaps.map((m) => PurchaseOrderItem.fromMap(m)).toList();
-      purchases.add(purchase.copyWith(items: items));
-    }
-
-    return purchases;
-  }
-
-  /// Get all products for stock report
-  Future<List<Product>> getAllProducts() async {
-    final db = await _databaseHelper.database;
-    final maps = await db.query('products', orderBy: 'name ASC');
-    return maps.map((m) => Product.fromMap(m)).toList();
   }
 }

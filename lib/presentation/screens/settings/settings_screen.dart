@@ -10,20 +10,9 @@ import 'package:flutter_pos/logic/cubits/auth/auth_state.dart';
 import 'package:flutter_pos/logic/cubits/settings/settings_cubit.dart';
 import 'package:flutter_pos/logic/cubits/settings/settings_state.dart';
 import 'package:flutter_pos/logic/cubits/user/user_cubit.dart';
-import 'package:flutter_pos/logic/cubits/customer/customer_cubit.dart';
 import 'package:flutter_pos/presentation/screens/settings/user_management_screen.dart';
 import 'package:flutter_pos/presentation/screens/settings/printer_settings_screen.dart';
 import 'package:flutter_pos/logic/cubits/printer/printer_cubit.dart';
-import 'package:flutter_pos/logic/cubits/product/product_cubit.dart';
-import 'package:flutter_pos/presentation/screens/products/product_list_screen.dart';
-import 'package:flutter_pos/presentation/screens/customers/customer_list_screen.dart';
-import 'package:flutter_pos/data/repositories/product_repository.dart';
-import 'package:flutter_pos/data/repositories/supplier_repository.dart';
-import 'package:flutter_pos/logic/cubits/supplier/supplier_cubit.dart';
-import 'package:flutter_pos/presentation/screens/purchasing/supplier_list_screen.dart';
-import 'package:flutter_pos/data/repositories/unit_repository.dart';
-import 'package:flutter_pos/logic/cubits/unit/unit_cubit.dart';
-import 'package:flutter_pos/presentation/screens/unit/unit_list_screen.dart';
 import 'package:flutter_pos/logic/sync/sync_cubit.dart';
 import 'package:flutter_pos/logic/sync/sync_state.dart';
 import 'package:flutter_pos/core/api/api_service.dart';
@@ -593,96 +582,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         _settingsCubit.updatePlantCode(value),
                                   ),
                                 ),
-                            ],
-                          ),
-
-                          // Plant Info Section (Owner only)
-                          if (user != null && user.role == UserRole.owner)
-                            // Service Management Section
-                          _buildSection(
-                            title: 'Layanan',
-                            children: [
-                              if (user != null && (user.role == UserRole.owner || user.canAccessItems))
-                                _buildSettingTile(
-                                  context: context,
-                                  icon: Icons.category,
-                                  title: 'Master Item',
-                                  subtitle: 'Kelola produk dan layanan',
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => BlocProvider(
-                                          create: (context) => ProductCubit(
-                                            context.read<ProductRepository>(),
-                                          ),
-                                          child: const ProductListScreen(),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              if (user != null && (user.role == UserRole.owner || user.canAccessItems) && (user.role == UserRole.owner || user.canAccessSuppliers))
-                                _buildDivider(),
-                              if (user != null && (user.role == UserRole.owner || user.canAccessSuppliers))
-                                _buildSettingTile(
-                                  context: context,
-                                  icon: Icons.people_outline,
-                                  title: 'Supplier',
-                                  subtitle: 'Kelola data supplier',
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => BlocProvider(
-                                          create: (context) => SupplierCubit(
-                                            supplierRepository: context.read<SupplierRepository>(),
-                                          )..loadSuppliers(),
-                                          child: const SupplierListScreen(),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              if (user != null) _buildDivider(),
-                              _buildSettingTile(
-                                context: context,
-                                icon: Icons.straighten,
-                                title: 'Master Satuan',
-                                subtitle: 'Kelola satuan produk',
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const UnitListScreen(),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-
-                          // Customer Management Section
-                          _buildSection(
-                            title: 'Pelanggan',
-                            children: [
-                              _buildSettingTile(
-                                context: context,
-                                icon: Icons.people_alt,
-                                title: 'Kelola Pelanggan',
-                                subtitle: 'Lihat dan kelola data pelanggan',
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => BlocProvider(
-                                        create: (_) => CustomerCubit(),
-                                        child: CustomerListScreen(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
                             ],
                           ),
 

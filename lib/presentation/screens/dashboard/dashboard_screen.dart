@@ -2,26 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_pos/core/theme/app_theme.dart';
 import 'package:flutter_pos/core/utils/currency_formatter.dart';
-import 'package:flutter_pos/data/models/order.dart';
 import 'package:flutter_pos/data/models/user.dart';
 import 'package:flutter_pos/logic/cubits/auth/auth_cubit.dart';
 import 'package:flutter_pos/logic/cubits/auth/auth_state.dart';
 import 'package:flutter_pos/logic/cubits/dashboard/dashboard_cubit.dart';
 import 'package:flutter_pos/logic/cubits/dashboard/dashboard_state.dart';
-import 'package:flutter_pos/logic/cubits/order/order_cubit.dart';
 import 'package:flutter_pos/logic/cubits/printer/printer_cubit.dart';
-import 'package:flutter_pos/presentation/screens/orders/order_detail_screen.dart';
-import 'package:flutter_pos/presentation/screens/orders/order_list_screen.dart';
 import 'package:flutter_pos/presentation/screens/settings/printer_settings_screen.dart';
-import 'package:flutter_pos/presentation/widgets/order_card.dart';
-import 'package:flutter_pos/data/repositories/product_repository.dart';
-import 'package:flutter_pos/logic/cubits/pos/pos_cubit.dart';
-import 'package:flutter_pos/logic/cubits/purchase_order/purchase_order_cubit.dart';
-import 'package:flutter_pos/presentation/screens/purchasing/purchase_order_list_screen.dart';
-import 'package:flutter_pos/data/repositories/purchase_order_repository.dart';
-import 'package:flutter_pos/logic/cubits/supplier/supplier_cubit.dart';
-import 'package:flutter_pos/data/repositories/supplier_repository.dart';
-import 'package:flutter_pos/presentation/screens/pos/pos_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final Function(int)? onSwitchTab;
@@ -54,7 +41,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case UserRole.owner:
         return 'Owner';
       case UserRole.kasir:
-        return 'Penjualan';
+        return 'Kasir';
     }
   }
 
@@ -93,13 +80,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
                             const SizedBox(height: AppSpacing.xl),
 
-                            // Order Status Section
-                            _buildOrderStatusSection(state),
-
-                            const SizedBox(height: AppSpacing.xl),
-
-                            // Recent Orders
-                            _buildRecentOrders(state),
+                            // Revenue Summary
+                            _buildRevenueSummary(state),
 
                             const SizedBox(height: AppSpacing.lg),
                           ],
@@ -136,16 +118,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            Text(
-              'Logout',
-              style: AppTypography.titleMedium.copyWith(
-                fontWeight: FontWeight.w600,
+            Flexible(
+              child: Text(
+                'Logout',
+                style: AppTypography.titleMedium.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
         ),
         content: Text(
-          'Apakah Anda yakin ingin keluar dari aplikasi?',
+          'Apakah Anda yakin ingin keluar?',
           style: AppTypography.bodyMedium,
         ),
         actions: [
@@ -282,25 +266,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: AppSpacing.xl),
 
               // Stats cards
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildHeaderStatCard(
-                      icon: Icons.account_balance_wallet_outlined,
-                      label: 'Omzet Hari Ini',
-                      value: CurrencyFormatter.formatCompact(todayRevenue),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: _buildHeaderStatCard(
-                      icon: Icons.receipt_long_outlined,
-                      label: 'Penjualan Bulan Ini',
-                      value: monthOrders.toString(),
-                    ),
-                  ),
-                ],
-              ),
+              
             ],
           ),
         ),
@@ -367,68 +333,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Expanded(
               child: _buildQuickActionItem(
-                icon: Icons.point_of_sale,
-                label: 'Penjualan',
+                icon: Icons.analytics,
+                label: 'Laporan',
                 color: AppThemeColors.primary,
                 onTap: () {
                   if (widget.onSwitchTab != null) {
                     widget.onSwitchTab!(1);
-                  } else {
-                    final isLargeScreen = MediaQuery.of(context).size.width > 800;
-                    if (isLargeScreen) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => BlocProvider(
-                            create: (context) => PosCubit(
-                              context.read<ProductRepository>(),
-                            )..loadProducts(),
-                            child: PosScreen(),
-                          ),
-                        ),
-                      ).then((_) => _dashboardCubit.loadDashboard());
-                    } else {
-                       Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => BlocProvider.value(
-                            value: context.read<OrderCubit>(),
-                            child: const OrderListScreen(),
-                          ),
-                        ),
-                      ).then((_) => _dashboardCubit.loadDashboard());
-                    }
                   }
-                },
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: _buildQuickActionItem(
-                icon: Icons.shopping_bag,
-                label: 'Pembelian',
-                color: AppThemeColors.primary,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MultiBlocProvider(
-                        providers: [
-                          BlocProvider(
-                            create: (context) => PurchaseOrderCubit(
-                              repository: context.read<PurchaseOrderRepository>(),
-                            ),
-                          ),
-                          BlocProvider(
-                            create: (context) => SupplierCubit(
-                              supplierRepository: context.read<SupplierRepository>(),
-                            ),
-                          ),
-                        ],
-                        child: const PurchaseOrderListScreen(),
-                      ),
-                    ),
-                  );
                 },
               ),
             ),
@@ -466,22 +377,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.lg,
-        ),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: AppRadius.lgRadius,
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.15),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: AppShadows.small,
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: 48,
@@ -496,7 +398,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Text(
               label,
               style: AppTypography.labelMedium.copyWith(
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -505,143 +407,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildOrderStatusSection(DashboardState state) {
-    Map<OrderStatus, int> counts = {
-      OrderStatus.pending: 0,
-      OrderStatus.process: 0,
-      OrderStatus.ready: 0,
-      OrderStatus.done: 0,
-    };
+  Widget _buildRevenueSummary(DashboardState state) {
+    int todayRevenue = 0;
+    int monthOrders = 0;
 
     if (state is DashboardLoaded) {
-      counts = Map.from(state.todayStatusCounts);
+      todayRevenue = state.todayRevenue;
+      monthOrders = state.monthOrderCount;
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Ringkasan Hari Ini',
+          'Ringkasan',
           style: AppTypography.titleMedium.copyWith(
             fontWeight: FontWeight.bold,
           ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Row(
-          children: [
-            _buildStatusItem(
-              'Pending',
-              counts[OrderStatus.pending] ?? 0,
-              AppThemeColors.warning,
-            ),
-            _buildStatusDivider(),
-            _buildStatusItem(
-              'Proses',
-              counts[OrderStatus.process] ?? 0,
-              AppThemeColors.primary,
-            ),
-            _buildStatusDivider(),
-            _buildStatusItem(
-              'Siap',
-              counts[OrderStatus.ready] ?? 0,
-              AppThemeColors.success,
-            ),
-            _buildStatusDivider(),
-            _buildStatusItem(
-              'Selesai',
-              counts[OrderStatus.done] ?? 0,
-              AppThemeColors.completed,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusItem(String label, int count, Color color) {
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                count.toString(),
-                style: AppTypography.titleMedium.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            label,
-            style: AppTypography.labelSmall.copyWith(
-              color: AppThemeColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusDivider() {
-    return Container(
-      width: 1,
-      height: 50,
-      color: AppThemeColors.border,
-    );
-  }
-
-  Widget _buildRecentOrders(DashboardState state) {
-    List<Order> recentOrders = [];
-
-    if (state is DashboardLoaded) {
-      // Limit to 5 orders
-      recentOrders = state.recentOrders.take(5).toList();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Penjualan Terbaru',
-              style: AppTypography.titleMedium.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                // Navigate to orders list
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: context.read<OrderCubit>(),
-                      child: const OrderListScreen(),
-                    ),
-                  ),
-                ).then((_) {
-                  _dashboardCubit.loadDashboard();
-                });
-              },
-              child: Text(
-                'Lihat Semua',
-                style: AppTypography.labelMedium.copyWith(
-                  color: AppThemeColors.primary,
-                ),
-              ),
-            ),
-          ],
         ),
         const SizedBox(height: AppSpacing.md),
         if (state is DashboardLoading)
@@ -653,50 +435,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
           )
-        else if (recentOrders.isEmpty)
+        else
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(AppSpacing.xxl),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: AppRadius.lgRadius,
               boxShadow: AppShadows.small,
             ),
             child: Column(
-              children: [
-                Icon(
-                  Icons.receipt_long_outlined,
-                  size: 48,
-                  color: AppThemeColors.textSecondary.withValues(alpha: 0.5),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  'Belum ada penjualan hari ini',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppThemeColors.textSecondary,
-                  ),
-                ),
+              children: [                
               ],
             ),
-          )
-        else
-          ...recentOrders.map((order) => Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: OrderCard(
-                  order: order,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: context.read<OrderCubit>(),
-                          child: OrderDetailScreen(orderId: order.id!),
-                        ),
-                      ),
-                    ).then((_) => _dashboardCubit.loadDashboard());
-                  },
-                ),
-              )),
+          ),
       ],
     );
   }

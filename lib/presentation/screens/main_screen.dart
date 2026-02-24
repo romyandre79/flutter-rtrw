@@ -4,24 +4,11 @@ import 'package:flutter_pos/core/theme/app_theme.dart';
 import 'package:flutter_pos/data/models/user.dart';
 import 'package:flutter_pos/logic/cubits/auth/auth_cubit.dart';
 import 'package:flutter_pos/logic/cubits/auth/auth_state.dart';
-import 'package:flutter_pos/logic/cubits/order/order_cubit.dart';
 import 'package:flutter_pos/logic/cubits/user/user_cubit.dart';
 import 'package:flutter_pos/logic/cubits/report/report_cubit.dart';
 import 'package:flutter_pos/presentation/screens/dashboard/dashboard_screen.dart';
 import 'package:flutter_pos/presentation/screens/reports/report_screen.dart';
 import 'package:flutter_pos/presentation/screens/settings/settings_screen.dart';
-import 'package:flutter_pos/presentation/screens/pos/pos_screen.dart';
-import 'package:flutter_pos/presentation/screens/orders/order_list_screen.dart';
-import 'package:flutter_pos/logic/cubits/pos/pos_cubit.dart';
-import 'package:flutter_pos/logic/cubits/supplier/supplier_cubit.dart';
-import 'package:flutter_pos/presentation/screens/purchasing/purchase_order_list_screen.dart';
-import 'package:flutter_pos/logic/cubits/purchase_order/purchase_order_cubit.dart';
-import 'package:flutter_pos/data/repositories/product_repository.dart';
-import 'package:flutter_pos/data/repositories/purchase_order_repository.dart';
-import 'package:flutter_pos/data/repositories/supplier_repository.dart';
-import 'package:flutter_pos/data/repositories/customer_repository.dart';
-import 'package:flutter_pos/data/repositories/order_repository.dart';
-import 'package:flutter_pos/data/repositories/payment_repository.dart';
 
 
 class MainScreen extends StatefulWidget {
@@ -33,26 +20,6 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
-  late OrderCubit _orderCubit;
-  PosCubit? _posCubit;
-
-  @override
-  void initState() {
-    super.initState();
-    _orderCubit = OrderCubit(
-      productRepository: context.read<ProductRepository>(),
-      orderRepository: context.read<OrderRepository>(),
-      customerRepository: context.read<CustomerRepository>(),
-      paymentRepository: context.read<PaymentRepository>(),
-    )..loadOrders();
-  }
-
-  @override
-  void dispose() {
-    _orderCubit.close();
-    _posCubit?.close();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,32 +43,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ];
 
-        final double screenWidth = MediaQuery.of(context).size.width;
-        final bool isLargeScreen = screenWidth > 600;
-
-        if (isOwner || user.role == UserRole.kasir) {
-          navItems.add(
-            BottomNavigationBarItem(
-              icon: Icon(isLargeScreen ? Icons.point_of_sale_outlined : Icons.receipt_long_outlined),
-              activeIcon: Icon(isLargeScreen ? Icons.point_of_sale : Icons.receipt_long),
-              label: 'Penjualan',
-            ),
-          );
-        }
-
-
-
-
-
         if (isOwner) {
-          navItems.add(
-            const BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_bag_outlined),
-              activeIcon: Icon(Icons.shopping_bag),
-              label: 'Pembelian',
-            ),
-          );
-
           navItems.add(
             const BottomNavigationBarItem(
               icon: Icon(Icons.analytics_outlined),
@@ -121,76 +63,14 @@ class _MainScreenState extends State<MainScreen> {
 
         // Build screens list based on role
         final screens = <Widget>[
-          BlocProvider.value(
-            value: _orderCubit,
-            child: DashboardScreen(
-              onSwitchTab: (index) {
-                setState(() => _currentIndex = index);
-                // Trigger reload if switching to Kasir (index 1) which might be PosScreen or OrderListScreen
-                final isLargeScreen = MediaQuery.of(context).size.width > 800;
-                if (index == 1) {
-                  if (isLargeScreen) {
-                    _posCubit?.loadProducts();
-                  } else {
-                     // Optionally reload orders
-                     _orderCubit.loadOrders();
-                  }
-                }
-              },
-            ),
+          DashboardScreen(
+            onSwitchTab: (index) {
+              setState(() => _currentIndex = index);
+            },
           ),
         ];
 
-        if (isOwner || user.role == UserRole.kasir) {
-          if (isLargeScreen) {
-             // Add POS Screen for large screens
-             // Initialize PosCubit if not already done
-             _posCubit ??= PosCubit(
-               context.read<ProductRepository>(),
-             )..loadProducts();
-             
-             screens.add(
-              BlocProvider.value(
-                value: _posCubit!,
-                child: const PosScreen(),
-              ),
-            );
-          } else {
-            // Add OrderListScreen for small screens
-            screens.add(
-              BlocProvider.value(
-                value: _orderCubit,
-                child: const OrderListScreen(),
-              ),
-            );
-          }
-        }
-
-
-
-
-
         if (isOwner) {
-          // Add Pembelian Screen
-          screens.add(
-            MultiBlocProvider(
-              providers: [
-                BlocProvider(
-                  create: (context) => PurchaseOrderCubit(
-                    repository: context.read<PurchaseOrderRepository>(),
-                  )..loadPurchaseOrders(),
-                ),
-                // We also need SupplierCubit available for the Create Screen which is pushed from here
-                BlocProvider(
-                  create: (context) => SupplierCubit(
-                   supplierRepository: context.read<SupplierRepository>(),
-                  ),
-                ),
-              ],
-              child: const PurchaseOrderListScreen(),
-            ),
-          );
-          
           screens.add(
             BlocProvider(
               create: (_) => ReportCubit(),
@@ -247,10 +127,6 @@ class _MainScreenState extends State<MainScreen> {
                 child: GestureDetector(
                   onTap: () {
                     setState(() => _currentIndex = index);
-                    // If switching to POS (Kasir) tab, reload products
-                    if (item.label == 'Penjualan') {
-                      _posCubit?.loadProducts();
-                    }
                   },
                   behavior: HitTestBehavior.opaque,
                   child: Column(

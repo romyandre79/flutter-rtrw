@@ -10,23 +10,10 @@ class SyncCubit extends Cubit<SyncState> {
   Future<void> syncData() async {
     emit(const SyncLoading('Syncing data...'));
     try {
-      emit(const SyncLoading('Uploading transactions...'));
-      final uploadedCount = await _syncService.uploadOrders();
-      
       emit(const SyncLoading('Downloading master data...'));
       await _syncService.downloadMasterData();
       
-      emit(SyncSuccess('Sync completed. Uploaded: $uploadedCount orders.'));
-    } catch (e) {
-      emit(SyncFailure(e.toString()));
-    }
-  }
-
-  Future<void> uploadTransactions() async {
-    emit(const SyncLoading('Uploading transactions...'));
-    try {
-      final uploadedCount = await _syncService.uploadOrders();
-      emit(SyncSuccess('Uploaded $uploadedCount transactions.'));
+      emit(const SyncSuccess('Sync completed.'));
     } catch (e) {
       emit(SyncFailure(e.toString()));
     }

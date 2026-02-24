@@ -13,20 +13,13 @@ import 'package:flutter_pos/presentation/screens/auth/login_screen.dart';
 import 'package:flutter_pos/presentation/screens/main_screen.dart';
 import 'package:flutter_pos/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:flutter_pos/data/repositories/auth_repository.dart';
-import 'package:flutter_pos/data/repositories/customer_repository.dart';
-import 'package:flutter_pos/data/repositories/order_repository.dart';
 import 'package:flutter_pos/data/repositories/report_repository.dart';
-import 'package:flutter_pos/data/repositories/service_repository.dart';
 import 'package:flutter_pos/data/repositories/user_repository.dart';
-import 'package:flutter_pos/data/repositories/supplier_repository.dart';
-import 'package:flutter_pos/data/repositories/purchase_order_repository.dart';
-import 'package:flutter_pos/data/repositories/product_repository.dart';
 import 'package:flutter_pos/data/repositories/unit_repository.dart';
 import 'package:flutter_pos/core/api/api_service.dart';
 import 'package:flutter_pos/core/services/notification_service.dart';
 import 'package:flutter_pos/core/services/sync_service.dart';
 import 'package:flutter_pos/data/repositories/payment_repository.dart';
-import 'package:flutter_pos/logic/cubits/order/order_cubit.dart';
 import 'package:flutter_pos/logic/sync/sync_cubit.dart';
 import 'package:flutter_pos/logic/cubits/unit/unit_cubit.dart';
 
@@ -68,16 +61,10 @@ class MyApp extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider(create: (_) => AuthRepository()),
-        RepositoryProvider(create: (_) => ServiceRepository()),
-        RepositoryProvider(create: (_) => OrderRepository()),
-        RepositoryProvider(create: (_) => CustomerRepository()),
         RepositoryProvider(create: (_) => ReportRepository()),
         RepositoryProvider(create: (_) => UserRepository()),
-        RepositoryProvider(create: (_) => SupplierRepository()),
-        RepositoryProvider(create: (_) => PurchaseOrderRepository()),
-        RepositoryProvider(create: (_) => ProductRepository()),         
-        RepositoryProvider(create: (_) => PaymentRepository()), 
-        RepositoryProvider(create: (_) => UnitRepository()), // Add UnitRepository
+        RepositoryProvider(create: (_) => PaymentRepository()),
+        RepositoryProvider(create: (_) => UnitRepository()),
         RepositoryProvider(create: (_) => ApiService()),
         RepositoryProvider(
           create: (context) => SyncService(
@@ -92,14 +79,6 @@ class MyApp extends StatelessWidget {
             create: (context) => AuthCubit(
               authRepository: context.read<AuthRepository>(),
             )..checkAuthStatus(),
-          ),
-          BlocProvider(
-            create: (context) => OrderCubit(
-              orderRepository: context.read<OrderRepository>(),
-              productRepository: context.read<ProductRepository>(),
-              customerRepository: context.read<CustomerRepository>(),
-              paymentRepository: context.read<PaymentRepository>(),
-            )..loadOrders(),
           ),
           BlocProvider(
             create: (context) => SyncCubit(

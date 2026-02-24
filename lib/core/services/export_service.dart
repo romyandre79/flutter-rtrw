@@ -4,9 +4,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart' show SharePlus, ShareParams, XFile;
 import 'package:flutter_pos/data/models/order.dart';
-import 'package:flutter_pos/data/models/purchase_order.dart';
-import 'package:flutter_pos/data/models/product.dart';
-import 'package:flutter_pos/core/constants/app_constants.dart';
 import 'package:flutter_pos/core/utils/currency_formatter.dart';
 import 'package:flutter_pos/core/utils/date_formatter.dart';
 import 'package:flutter_pos/logic/cubits/report/report_state.dart';
@@ -44,41 +41,6 @@ class ExportService {
       await file.writeAsBytes(fileBytes);
       return filePath;
     }
-  }
-
-  // Template downloads
-  Future<String?> downloadProductTemplate() async {
-    final excel = Excel.createExcel();
-    final sheet = excel['Template Produk'];
-    sheet.cell(CellIndex.indexByString('A1')).value = TextCellValue('nama');
-    sheet.cell(CellIndex.indexByString('B1')).value = TextCellValue('harga');
-    sheet.cell(CellIndex.indexByString('C1')).value = TextCellValue('harga_modal');
-    sheet.cell(CellIndex.indexByString('D1')).value = TextCellValue('satuan');
-    sheet.cell(CellIndex.indexByString('E1')).value = TextCellValue('tipe');
-    sheet.cell(CellIndex.indexByString('F1')).value = TextCellValue('stok');
-    excel.delete('Sheet1');
-    return saveExcelFile(excel, 'Template_Produk_${AppConstants.appName}.xlsx');
-  }
-
-  Future<String?> downloadCustomerTemplate() async {
-    final excel = Excel.createExcel();
-    final sheet = excel['Template Pelanggan'];
-    sheet.cell(CellIndex.indexByString('A1')).value = TextCellValue('nama');
-    sheet.cell(CellIndex.indexByString('B1')).value = TextCellValue('telepon');
-    sheet.cell(CellIndex.indexByString('C1')).value = TextCellValue('alamat');
-    excel.delete('Sheet1');
-    return saveExcelFile(excel, 'Template_Pelanggan_${AppConstants.appName}.xlsx');
-  }
-
-  Future<String?> downloadSupplierTemplate() async {
-    final excel = Excel.createExcel();
-    final sheet = excel['Template Supplier'];
-    sheet.cell(CellIndex.indexByString('A1')).value = TextCellValue('nama');
-    sheet.cell(CellIndex.indexByString('B1')).value = TextCellValue('telepon');
-    sheet.cell(CellIndex.indexByString('C1')).value = TextCellValue('alamat');
-    sheet.cell(CellIndex.indexByString('D1')).value = TextCellValue('catatan');
-    excel.delete('Sheet1');
-    return saveExcelFile(excel, 'Template_Supplier_${AppConstants.appName}.xlsx');
   }
 
   /// Export orders to Excel (Summary report)
@@ -143,25 +105,15 @@ class ExportService {
     sheet.cell(CellIndex.indexByString('A12')).value = TextCellValue('Total Belum Dibayar');
     sheet.cell(CellIndex.indexByString('B12')).value =
         TextCellValue(CurrencyFormatter.format(reportData.totalUnpaid));
-        
-    sheet.cell(CellIndex.indexByString('A13')).value = TextCellValue('Total Pembelian');
-    sheet.cell(CellIndex.indexByString('B13')).value =
-        TextCellValue(CurrencyFormatter.format(reportData.totalPurchases));
 
-    sheet.cell(CellIndex.indexByString('A14')).value = TextCellValue('Total Laba Bersih');
-    sheet.cell(CellIndex.indexByString('B14')).value =
-        TextCellValue(CurrencyFormatter.format(reportData.totalProfit));
+    sheet.cell(CellIndex.indexByString('A14')).value = TextCellValue('Laporan Harian');
 
-    sheet.cell(CellIndex.indexByString('A16')).value = TextCellValue('Laporan Harian');
+    sheet.cell(CellIndex.indexByString('A15')).value = TextCellValue('Tanggal');
+    sheet.cell(CellIndex.indexByString('B15')).value = TextCellValue('Jumlah Penjualan');
+    sheet.cell(CellIndex.indexByString('C15')).value = TextCellValue('Omzet');
+    sheet.cell(CellIndex.indexByString('D15')).value = TextCellValue('Dibayar');
 
-    sheet.cell(CellIndex.indexByString('A17')).value = TextCellValue('Tanggal');
-    sheet.cell(CellIndex.indexByString('B17')).value = TextCellValue('Jumlah Penjualan');
-    sheet.cell(CellIndex.indexByString('C17')).value = TextCellValue('Omzet');
-    sheet.cell(CellIndex.indexByString('D17')).value = TextCellValue('Dibayar');
-    sheet.cell(CellIndex.indexByString('E17')).value = TextCellValue('Pembelian');
-    sheet.cell(CellIndex.indexByString('F17')).value = TextCellValue('Laba');
-
-    int row = 18;
+    int row = 16;
     for (final daily in reportData.dailyRevenue) {
       sheet.cell(CellIndex.indexByString('A$row')).value =
           TextCellValue(DateFormatter.formatDate(daily.date));
@@ -170,10 +122,6 @@ class ExportService {
           TextCellValue(CurrencyFormatter.format(daily.revenue));
       sheet.cell(CellIndex.indexByString('D$row')).value =
           TextCellValue(CurrencyFormatter.format(daily.paid));
-      sheet.cell(CellIndex.indexByString('E$row')).value =
-          TextCellValue(CurrencyFormatter.format(daily.purchases));
-      sheet.cell(CellIndex.indexByString('F$row')).value =
-          TextCellValue(CurrencyFormatter.format(daily.profit));
       row++;
     }
   }
@@ -305,148 +253,5 @@ class ExportService {
     }
 
     throw Exception('Gagal membuat file Excel Detail Penjualan');
-  }
-
-  /// Export Purchase Detail to Excel
-  Future<String> exportPurchaseDetailToExcel(
-    List<PurchaseOrder> purchases,
-    ReportData reportData,
-  ) async {
-    final excel = Excel.createExcel();
-    final sheet = excel['Detail Pembelian'];
-
-    sheet.cell(CellIndex.indexByString('A1')).value = TextCellValue('Supplier');
-    sheet.cell(CellIndex.indexByString('B1')).value = TextCellValue('Tanggal');
-    sheet.cell(CellIndex.indexByString('C1')).value = TextCellValue('Status');
-    sheet.cell(CellIndex.indexByString('D1')).value = TextCellValue('Item');
-    sheet.cell(CellIndex.indexByString('E1')).value = TextCellValue('Qty');
-    sheet.cell(CellIndex.indexByString('F1')).value = TextCellValue('Satuan');
-    sheet.cell(CellIndex.indexByString('G1')).value = TextCellValue('Harga Satuan');
-    sheet.cell(CellIndex.indexByString('H1')).value = TextCellValue('Subtotal');
-    sheet.cell(CellIndex.indexByString('I1')).value = TextCellValue('Total Transaksi');
-
-    int row = 2;
-    for (final purchase in purchases) {
-      final supplierName = purchase.supplier?.name ?? 'Unknown Supplier';
-      
-      if (purchase.items.isEmpty) {
-        sheet.cell(CellIndex.indexByString('A$row')).value = TextCellValue(supplierName);
-        sheet.cell(CellIndex.indexByString('B$row')).value =
-            TextCellValue(DateFormatter.formatDate(purchase.orderDate));
-        sheet.cell(CellIndex.indexByString('C$row')).value = TextCellValue(purchase.statusDisplay);
-        sheet.cell(CellIndex.indexByString('I$row')).value =
-            TextCellValue(CurrencyFormatter.format(purchase.totalAmount));
-        row++;
-      } else {
-        bool firstItem = true;
-        for (final item in purchase.items) {
-          sheet.cell(CellIndex.indexByString('A$row')).value = TextCellValue(supplierName);
-          sheet.cell(CellIndex.indexByString('B$row')).value =
-              TextCellValue(DateFormatter.formatDate(purchase.orderDate));
-          sheet.cell(CellIndex.indexByString('C$row')).value = TextCellValue(purchase.statusDisplay);
-          
-          sheet.cell(CellIndex.indexByString('D$row')).value = TextCellValue(item.itemName);
-          sheet.cell(CellIndex.indexByString('E$row')).value = IntCellValue(item.quantity);
-          sheet.cell(CellIndex.indexByString('F$row')).value = TextCellValue('-');
-          sheet.cell(CellIndex.indexByString('G$row')).value =
-              TextCellValue(CurrencyFormatter.format(item.cost));
-          sheet.cell(CellIndex.indexByString('H$row')).value =
-              TextCellValue(CurrencyFormatter.format(item.subtotal));
-          
-          if (firstItem) {
-             sheet.cell(CellIndex.indexByString('I$row')).value =
-                TextCellValue(CurrencyFormatter.format(purchase.totalAmount));
-             firstItem = false;
-          }
-          row++;
-        }
-      }
-    }
-
-    excel.delete('Sheet1');
-
-    final directory = await getApplicationDocumentsDirectory();
-    final fileName =
-        'Laporan_Pembelian_Detail_${DateFormatter.formatDateCompact(reportData.startDate)}_${DateFormatter.formatDateCompact(reportData.endDate)}.xlsx';
-    final filePath = '${directory.path}/$fileName';
-
-    final fileBytes = excel.save();
-    if (fileBytes != null) {
-      final file = File(filePath);
-      await file.writeAsBytes(fileBytes);
-      return filePath;
-    }
-
-    throw Exception('Gagal membuat file Excel Detail Pembelian');
-  }
-
-  /// Export Stock Report to Excel
-  Future<String> exportStockReportToExcel(
-    List<Product> products,
-  ) async {
-    final excel = Excel.createExcel();
-    final sheet = excel['Stok Produk'];
-
-    sheet.cell(CellIndex.indexByString('A1')).value = TextCellValue('Nama Produk');
-    sheet.cell(CellIndex.indexByString('B1')).value = TextCellValue('Kategori');
-    sheet.cell(CellIndex.indexByString('C1')).value = TextCellValue('Stok');
-    sheet.cell(CellIndex.indexByString('D1')).value = TextCellValue('Satuan');
-    sheet.cell(CellIndex.indexByString('E1')).value = TextCellValue('Harga Modal');
-    sheet.cell(CellIndex.indexByString('F1')).value = TextCellValue('Harga Jual');
-    sheet.cell(CellIndex.indexByString('G1')).value = TextCellValue('Nilai Aset (Modal)');
-    sheet.cell(CellIndex.indexByString('H1')).value = TextCellValue('Nilai Jual');
-
-    int row = 2;
-    int totalAssetValue = 0;
-    int totalSalesValue = 0;
-
-    for (final product in products) {
-      final stock = product.stock ?? 0;
-      final assetValue = (stock * product.cost).round();
-      final salesValue = (stock * product.price).round();
-
-      totalAssetValue += assetValue;
-      totalSalesValue += salesValue;
-
-      sheet.cell(CellIndex.indexByString('A$row')).value = TextCellValue(product.name);
-      sheet.cell(CellIndex.indexByString('B$row')).value = TextCellValue(product.type.displayName);
-      sheet.cell(CellIndex.indexByString('C$row')).value = IntCellValue(stock);
-      sheet.cell(CellIndex.indexByString('D$row')).value = TextCellValue(product.unit);
-      
-      sheet.cell(CellIndex.indexByString('E$row')).value =
-          TextCellValue(CurrencyFormatter.format(product.cost));
-      sheet.cell(CellIndex.indexByString('F$row')).value =
-          TextCellValue(CurrencyFormatter.format(product.price));
-      
-      sheet.cell(CellIndex.indexByString('G$row')).value =
-          TextCellValue(CurrencyFormatter.format(assetValue));
-      sheet.cell(CellIndex.indexByString('H$row')).value =
-          TextCellValue(CurrencyFormatter.format(salesValue));
-      
-      row++;
-    }
-
-    row++;
-    sheet.cell(CellIndex.indexByString('A$row')).value = TextCellValue('TOTAL');
-    sheet.cell(CellIndex.indexByString('G$row')).value =
-        TextCellValue(CurrencyFormatter.format(totalAssetValue));
-    sheet.cell(CellIndex.indexByString('H$row')).value =
-        TextCellValue(CurrencyFormatter.format(totalSalesValue));
-
-    excel.delete('Sheet1');
-
-    final directory = await getApplicationDocumentsDirectory();
-    final fileName =
-        'Laporan_Stok_${DateFormatter.formatDateCompact(DateTime.now())}.xlsx';
-    final filePath = '${directory.path}/$fileName';
-
-    final fileBytes = excel.save();
-    if (fileBytes != null) {
-      final file = File(filePath);
-      await file.writeAsBytes(fileBytes);
-      return filePath;
-    }
-
-    throw Exception('Gagal membuat file Excel Laporan Stok');
   }
 }
