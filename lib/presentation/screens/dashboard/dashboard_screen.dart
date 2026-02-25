@@ -1,171 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_pos/core/theme/app_theme.dart';
-import 'package:flutter_pos/core/utils/currency_formatter.dart';
 import 'package:flutter_pos/data/models/user.dart';
 import 'package:flutter_pos/logic/cubits/auth/auth_cubit.dart';
 import 'package:flutter_pos/logic/cubits/auth/auth_state.dart';
 import 'package:flutter_pos/logic/cubits/dashboard/dashboard_cubit.dart';
 import 'package:flutter_pos/logic/cubits/dashboard/dashboard_state.dart';
-import 'package:flutter_pos/logic/cubits/printer/printer_cubit.dart';
-import 'package:flutter_pos/presentation/screens/settings/printer_settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final Function(int)? onSwitchTab;
-
   const DashboardScreen({super.key, this.onSwitchTab});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-
-
 class _DashboardScreenState extends State<DashboardScreen> {
-  late DashboardCubit _dashboardCubit;
-
   @override
   void initState() {
     super.initState();
-    _dashboardCubit = DashboardCubit()..loadDashboard();
-  }
-
-  @override
-  void dispose() {
-    _dashboardCubit.close();
-    super.dispose();
-  }
-
-  String _getRoleDisplayName(UserRole role) {
-    switch (role) {
-      case UserRole.owner:
-        return 'Owner';
-      case UserRole.kasir:
-        return 'Kasir';
-    }
+    context.read<DashboardCubit>().loadDashboard();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AuthCubit, AuthState>(
-      builder: (context, authState) {
-        final user = authState is AuthAuthenticated ? authState.user : null;
+    return Scaffold(
+      backgroundColor: AppThemeColors.background,
+      body: BlocBuilder<AuthCubit, AuthState>(
+        builder: (context, authState) {
+          final user = authState is AuthAuthenticated ? authState.user : null;
 
-        return Scaffold(
-          backgroundColor: AppThemeColors.background,
-          body: BlocBuilder<DashboardCubit, DashboardState>(
-            bloc: _dashboardCubit,
-            builder: (context, state) {
-              return RefreshIndicator(
-                onRefresh: () async {
-                  _dashboardCubit.loadDashboard();
-                },
-                color: AppThemeColors.primary,
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
+          return RefreshIndicator(
+            onRefresh: () async => context.read<DashboardCubit>().loadDashboard(),
+            color: AppThemeColors.primary,
+            child: ListView(
+              children: [
+                _buildHeader(user),
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header with gradient
-                      _buildHeader(user, state),
-
-                      // Content
-                      Padding(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Quick Actions
-                            _buildQuickActions(),
-
-                            const SizedBox(height: AppSpacing.xl),
-
-                            // Revenue Summary
-                            _buildRevenueSummary(state),
-
-                            const SizedBox(height: AppSpacing.lg),
-                          ],
-                        ),
-                      ),
+                      _buildQuickActions(),
+                      const SizedBox(height: AppSpacing.xl),
+                      _buildSummarySection(),
                     ],
                   ),
                 ),
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  void _showLogoutConfirmation() {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppThemeColors.error.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.logout,
-                color: AppThemeColors.error,
-                size: 24,
-              ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Flexible(
-              child: Text(
-                'Logout',
-                style: AppTypography.titleMedium.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          'Apakah Anda yakin ingin keluar?',
-          style: AppTypography.bodyMedium,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
-              'Batal',
-              style: AppTypography.labelMedium.copyWith(
-                color: AppThemeColors.textSecondary,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              context.read<AuthCubit>().logout();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppThemeColors.error,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(
-              'Logout',
-              style: AppTypography.labelMedium.copyWith(
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildHeader(User? user, DashboardState state) {
+  Widget _buildHeader(User? user) {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
@@ -177,10 +67,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             children: [
-              // Top row - User info
               Row(
                 children: [
-                  // Avatar
                   Container(
                     width: 44,
                     height: 44,
@@ -188,23 +76,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       color: Colors.white,
                       borderRadius: AppRadius.fullRadius,
                     ),
-                    child: const Icon(
-                      Icons.person,
-                      color: AppThemeColors.primary,
-                      size: 24,
-                    ),
+                    child: const Icon(Icons.person, color: AppThemeColors.primary, size: 24),
                   ),
                   const SizedBox(width: AppSpacing.md),
-                  // Name & greeting
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Selamat Datang,',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: Colors.white70,
-                          ),
+                          style: AppTypography.bodySmall.copyWith(color: Colors.white70),
                         ),
                         Text(
                           user?.name ?? 'User',
@@ -216,12 +97,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                     ),
                   ),
-                  // Role badge
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.xs,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: AppRadius.fullRadius,
@@ -234,31 +111,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  // Logout button
-                  GestureDetector(
-                    onTap: _showLogoutConfirmation,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: AppRadius.fullRadius,
-                      ),
-                      child: const Icon(
-                        Icons.logout,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ),
                 ],
               ),
-
-              const SizedBox(height: AppSpacing.xl),
-
-              // Stats cards
-              
+              const SizedBox(height: AppSpacing.lg),
+              // App description
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: AppRadius.mdRadius,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_city, color: Colors.white, size: 24),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        'Sistem Informasi RT/RW',
+                        style: AppTypography.titleSmall.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -266,8 +144,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-
-
+  String _getRoleDisplayName(UserRole role) {
+    switch (role) {
+      case UserRole.owner:
+        return 'Admin';
+      case UserRole.kasir:
+        return 'Staff';
+    }
+  }
 
   Widget _buildQuickActions() {
     return Column(
@@ -275,42 +159,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         Text(
           'Menu Cepat',
-          style: AppTypography.titleMedium.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: AppSpacing.md),
         Row(
           children: [
             Expanded(
               child: _buildQuickActionItem(
-                icon: Icons.analytics,
-                label: 'Laporan',
+                icon: Icons.person_add,
+                label: 'Tambah Warga',
                 color: AppThemeColors.primary,
-                onTap: () {
-                  if (widget.onSwitchTab != null) {
-                    widget.onSwitchTab!(1);
-                  }
-                },
+                onTap: () => widget.onSwitchTab?.call(1),
               ),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: _buildQuickActionItem(
-                icon: Icons.print,
-                label: 'Printer',
+                icon: Icons.add_home,
+                label: 'Tambah Rumah',
+                color: AppThemeColors.success,
+                onTap: () => widget.onSwitchTab?.call(2),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: _buildQuickActionItem(
+                icon: Icons.admin_panel_settings,
+                label: 'Pengurus',
                 color: AppThemeColors.warning,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BlocProvider(
-                        create: (_) => PrinterCubit(),
-                        child: const PrinterSettingsScreen(),
-                      ),
-                    ),
-                  );
-                },
+                onTap: () => widget.onSwitchTab?.call(3),
               ),
             ),
           ],
@@ -328,7 +205,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: AppRadius.lgRadius,
@@ -348,9 +225,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: AppSpacing.sm),
             Text(
               label,
-              style: AppTypography.labelMedium.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTypography.labelSmall.copyWith(fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -358,49 +234,108 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildRevenueSummary(DashboardState state) {
-    int todayRevenue = 0;
-    int monthOrders = 0;
+  Widget _buildSummarySection() {
+    return BlocBuilder<DashboardCubit, DashboardState>(
+      builder: (context, state) {
+        int totalWarga = 0;
+        int totalRumah = 0;
+        int totalPengurus = 0;
 
-    if (state is DashboardLoaded) {
-      todayRevenue = state.todayRevenue;
-      monthOrders = state.monthOrderCount;
-    }
+        if (state is DashboardLoaded) {
+          totalWarga = state.totalWarga;
+          totalRumah = state.totalRumah;
+          totalPengurus = state.totalPengurus;
+        }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Ringkasan',
-          style: AppTypography.titleMedium.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        if (state is DashboardLoading)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: CircularProgressIndicator(
-                color: AppThemeColors.primary,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Ringkasan Data',
+              style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            if (state is DashboardLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: CircularProgressIndicator(color: AppThemeColors.primary),
+                ),
+              )
+            else
+              Column(
+                children: [
+                  _buildStatCard(
+                    icon: Icons.people,
+                    label: 'Total Warga Aktif',
+                    value: totalWarga.toString(),
+                    color: AppThemeColors.primary,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  _buildStatCard(
+                    icon: Icons.home,
+                    label: 'Total Rumah',
+                    value: totalRumah.toString(),
+                    color: AppThemeColors.success,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  _buildStatCard(
+                    icon: Icons.admin_panel_settings,
+                    label: 'Pengurus Aktif',
+                    value: totalPengurus.toString(),
+                    color: AppThemeColors.warning,
+                  ),
+                ],
               ),
-            ),
-          )
-        else
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: AppRadius.lgRadius,
+        boxShadow: AppShadows.small,
+      ),
+      child: Row(
+        children: [
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: AppRadius.lgRadius,
-              boxShadow: AppShadows.small,
+              color: color.withValues(alpha: 0.1),
+              borderRadius: AppRadius.mdRadius,
             ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: AppSpacing.lg),
+          Expanded(
             child: Column(
-              children: [                
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: AppTypography.bodyMedium.copyWith(color: AppThemeColors.textSecondary)),
+                Text(
+                  value,
+                  style: AppTypography.headlineMedium.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
               ],
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }

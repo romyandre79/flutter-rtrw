@@ -1,0 +1,101 @@
+﻿Resolving dependencies...
+Downloading packages...
+  archive 3.6.1 (4.0.9 available)
+  cross_file 0.3.5+1 (0.3.5+2 available)
+  ffi 2.1.5 (2.2.0 available)
+  flutter_blue_plus 1.36.8 (2.1.1 available)
+  flutter_blue_plus_android 7.0.4 (8.1.0 available)
+  flutter_blue_plus_darwin 7.0.3 (8.1.1 available)
+  flutter_blue_plus_linux 7.0.3 (8.1.0 available)
+  flutter_blue_plus_platform_interface 7.0.0 (8.1.0 available)
+  flutter_blue_plus_web 7.0.2 (8.1.0 available)
+  flutter_local_notifications 17.2.4 (20.1.0 available)
+  flutter_local_notifications_linux 4.0.1 (7.0.0 available)
+  flutter_local_notifications_platform_interface 7.2.0 (10.0.0 available)
+  flutter_thermal_printer 1.2.1+1 (2.0.1 available)
+  google_fonts 7.0.2 (8.0.2 available)
+  image 4.3.0 (4.8.0 available)
+  image_picker_android 0.8.13+13 (0.8.13+14 available)
+  lints 6.0.0 (6.1.0 available)
+  meta 1.17.0 (1.18.1 available)
+  mobile_scanner 6.0.11 (7.2.0 available)
+  network_info_plus 5.0.3 (7.0.0 available)
+  path_provider_foundation 2.5.1 (2.6.0 available)
+  petitparser 7.0.1 (7.0.2 available)
+  rxdart 0.27.7 (0.28.0 available)
+  shared_preferences_android 2.4.18 (2.4.20 available)
+  source_span 1.10.1 (1.10.2 available)
+  sqlite3 3.1.4 (3.1.6 available)
+  timezone 0.9.4 (0.11.0 available)
+  url_launcher_ios 6.3.6 (6.4.1 available)
+  uuid 4.5.2 (4.5.3 available)
+  win32 5.15.0 (6.0.0 available)
+Got dependencies!
+30 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing flutter-rtrw...                                       
+
+  error - The getter 'defaultStoreName' isn't defined for the type 'AppConstants' - lib\core\services\store_print.dart:17:24 - undefined_getter
+  error - The getter 'defaultStoreAddress' isn't defined for the type 'AppConstants' - lib\core\services\store_print.dart:19:24 - undefined_getter
+  error - The getter 'defaultStorePhone' isn't defined for the type 'AppConstants' - lib\core\services\store_print.dart:21:24 - undefined_getter
+  error - The getter 'defaultInvoicePrefix' isn't defined for the type 'AppConstants' - lib\core\utils\invoice_generator.dart:33:76 - undefined_getter
+  error - The getter 'defaultMachineNumber' isn't defined for the type 'AppConstants' - lib\core\utils\invoice_generator.dart:35:83 - undefined_getter
+  error - Undefined name 'Sqflite' - lib\data\repositories\pengurus_repository.dart:95:12 - undefined_identifier
+  error - Undefined name 'Sqflite' - lib\data\repositories\rumah_repository.dart:86:12 - undefined_identifier
+  error - Undefined name 'Sqflite' - lib\data\repositories\warga_repository.dart:125:12 - undefined_identifier
+   info - 'Share' is deprecated and shouldn't be used. Use SharePlus instead - lib\data\services\database_service.dart:36:13 - deprecated_member_use
+   info - 'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead - lib\data\services\database_service.dart:36:19 - deprecated_member_use
+  error - The getter 'defaultStoreName' isn't defined for the type 'AppConstants' - lib\logic\cubits\settings\settings_cubit.dart:27:26 - undefined_getter
+  error - The getter 'defaultStoreAddress' isn't defined for the type 'AppConstants' - lib\logic\cubits\settings\settings_cubit.dart:29:26 - undefined_getter
+  error - The getter 'defaultStorePhone' isn't defined for the type 'AppConstants' - lib\logic\cubits\settings\settings_cubit.dart:31:26 - undefined_getter
+  error - The getter 'defaultInvoicePrefix' isn't defined for the type 'AppConstants' - lib\logic\cubits\settings\settings_cubit.dart:33:26 - undefined_getter
+  error - The getter 'defaultMachineNumber' isn't defined for the type 'AppConstants' - lib\logic\cubits\settings\settings_cubit.dart:35:26 - undefined_getter
+   info - The imported package 'bloc' isn't a dependency of the importing package - lib\logic\cubits\unit\unit_cubit.dart:1:8 - depend_on_referenced_packages
+  error - There's no constant named 'staff' in 'UserRole' - lib\presentation\screens\dashboard\dashboard_screen.dart:151:21 - undefined_enum_constant
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\presentation\screens\pengurus\pengurus_form_screen.dart:243:9 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\presentation\screens\pengurus\pengurus_form_screen.dart:261:9 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\presentation\screens\pengurus\pengurus_list_screen.dart:155:19 - use_build_context_synchronously
+warning - Unused import: 'package:fl_chart/fl_chart.dart' - lib\presentation\screens\reports\report_screen.dart:3:8 - unused_import
+warning - Unused import: 'package:flutter_pos/core/utils/currency_formatter.dart' - lib\presentation\screens\reports\report_screen.dart:5:8 - unused_import
+warning - Unused import: 'package:flutter_pos/core/utils/date_formatter.dart' - lib\presentation\screens\reports\report_screen.dart:6:8 - unused_import
+warning - The value of the field '_selectedPeriod' isn't used - lib\presentation\screens\reports\report_screen.dart:21:10 - unused_field
+warning - The declaration '_setLastMonth' isn't referenced - lib\presentation\screens\reports\report_screen.dart:37:8 - unused_element
+warning - The declaration '_setThisWeek' isn't referenced - lib\presentation\screens\reports\report_screen.dart:45:8 - unused_element
+warning - The declaration '_setToday' isn't referenced - lib\presentation\screens\reports\report_screen.dart:52:8 - unused_element
+warning - The declaration '_selectDateRange' isn't referenced - lib\presentation\screens\reports\report_screen.dart:63:16 - unused_element
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\presentation\screens\rumah\rumah_form_screen.dart:237:9 - deprecated_member_use
+  error - The getter 'defaultStoreName' isn't defined for the type 'AppConstants' - lib\presentation\screens\settings\settings_screen.dart:516:50 - undefined_getter
+  error - The getter 'defaultStoreName' isn't defined for the type 'AppConstants' - lib\presentation\screens\settings\settings_screen.dart:521:52 - undefined_getter
+  error - The getter 'defaultStoreAddress' isn't defined for the type 'AppConstants' - lib\presentation\screens\settings\settings_screen.dart:535:50 - undefined_getter
+  error - The getter 'defaultStoreAddress' isn't defined for the type 'AppConstants' - lib\presentation\screens\settings\settings_screen.dart:540:52 - undefined_getter
+  error - The getter 'defaultStorePhone' isn't defined for the type 'AppConstants' - lib\presentation\screens\settings\settings_screen.dart:555:50 - undefined_getter
+  error - The getter 'defaultStorePhone' isn't defined for the type 'AppConstants' - lib\presentation\screens\settings\settings_screen.dart:560:52 - undefined_getter
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:602:62 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:608:62 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:639:66 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:646:62 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:680:66 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:684:45 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\screens\settings\settings_screen.dart:688:67 - use_build_context_synchronously
+  error - The getter 'defaultInvoicePrefix' isn't defined for the type 'AppConstants' - lib\presentation\screens\settings\settings_screen.dart:709:50 - undefined_getter
+  error - The getter 'defaultInvoicePrefix' isn't defined for the type 'AppConstants' - lib\presentation\screens\settings\settings_screen.dart:714:52 - undefined_getter
+  error - The getter 'defaultMachineNumber' isn't defined for the type 'AppConstants' - lib\presentation\screens\settings\settings_screen.dart:729:50 - undefined_getter
+  error - The getter 'defaultMachineNumber' isn't defined for the type 'AppConstants' - lib\presentation\screens\settings\settings_screen.dart:734:52 - undefined_getter
+   info - Parameter 'key' could be a super parameter - lib\presentation\screens\unit\unit_list_screen.dart:7:9 - use_super_parameters
+warning - The '!' will have no effect because the receiver can't be null - lib\presentation\screens\warga\warga_form_screen.dart:303:63 - unnecessary_non_null_assertion
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\presentation\screens\warga\warga_form_screen.dart:349:9 - deprecated_member_use
+
+flutter : 49 issues found. (ran in 
+31.7s)
+At line:1 char:1
++ flutter analyze 2>&1 | Out-File 
+-FilePath 
+C:\lara\www\flutter-rtrw\an ...
++ ~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpe 
+   cified: (49 issues found. (ran i  
+  n 31.7s):String) [], RemoteExcep   
+ tion
+    + FullyQualifiedErrorId : Native 
+   CommandError
+ 

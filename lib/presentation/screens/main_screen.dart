@@ -5,11 +5,15 @@ import 'package:flutter_pos/data/models/user.dart';
 import 'package:flutter_pos/logic/cubits/auth/auth_cubit.dart';
 import 'package:flutter_pos/logic/cubits/auth/auth_state.dart';
 import 'package:flutter_pos/logic/cubits/user/user_cubit.dart';
-import 'package:flutter_pos/logic/cubits/report/report_cubit.dart';
+import 'package:flutter_pos/logic/cubits/warga/warga_cubit.dart';
+import 'package:flutter_pos/logic/cubits/rumah/rumah_cubit.dart';
+import 'package:flutter_pos/logic/cubits/pengurus/pengurus_cubit.dart';
+import 'package:flutter_pos/logic/cubits/dashboard/dashboard_cubit.dart';
 import 'package:flutter_pos/presentation/screens/dashboard/dashboard_screen.dart';
-import 'package:flutter_pos/presentation/screens/reports/report_screen.dart';
+import 'package:flutter_pos/presentation/screens/warga/warga_list_screen.dart';
+import 'package:flutter_pos/presentation/screens/rumah/rumah_list_screen.dart';
+import 'package:flutter_pos/presentation/screens/pengurus/pengurus_list_screen.dart';
 import 'package:flutter_pos/presentation/screens/settings/settings_screen.dart';
-
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -34,24 +38,31 @@ class _MainScreenState extends State<MainScreen> {
         final user = state.user;
         final isOwner = user.role == UserRole.owner;
 
-        // Build navigation items based on role
+        // Build navigation items
         final navItems = <BottomNavigationBarItem>[
           const BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),
             activeIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+            label: 'Beranda',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.people_outlined),
+            activeIcon: Icon(Icons.people),
+            label: 'Warga',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Rumah',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.admin_panel_settings_outlined),
+            activeIcon: Icon(Icons.admin_panel_settings),
+            label: 'Pengurus',
           ),
         ];
 
         if (isOwner) {
-          navItems.add(
-            const BottomNavigationBarItem(
-              icon: Icon(Icons.analytics_outlined),
-              activeIcon: Icon(Icons.analytics),
-              label: 'Laporan',
-            ),
-          );
-        
           navItems.add(
             const BottomNavigationBarItem(
               icon: Icon(Icons.settings_outlined),
@@ -61,22 +72,31 @@ class _MainScreenState extends State<MainScreen> {
           );
         }
 
-        // Build screens list based on role
+        // Build screens
         final screens = <Widget>[
-          DashboardScreen(
-            onSwitchTab: (index) {
-              setState(() => _currentIndex = index);
-            },
+          BlocProvider(
+            create: (_) => DashboardCubit(),
+            child: DashboardScreen(
+              onSwitchTab: (index) {
+                setState(() => _currentIndex = index);
+              },
+            ),
+          ),
+          BlocProvider(
+            create: (_) => WargaCubit(),
+            child: const WargaListScreen(),
+          ),
+          BlocProvider(
+            create: (_) => RumahCubit(),
+            child: const RumahListScreen(),
+          ),
+          BlocProvider(
+            create: (_) => PengurusCubit(),
+            child: const PengurusListScreen(),
           ),
         ];
 
         if (isOwner) {
-          screens.add(
-            BlocProvider(
-              create: (_) => ReportCubit(),
-              child: const ReportScreen(),
-            ),
-          );
           screens.add(
             BlocProvider(
               create: (_) => UserCubit(),
@@ -85,84 +105,42 @@ class _MainScreenState extends State<MainScreen> {
           );
         }
 
-        // Ensure current index is valid
-        if (_currentIndex >= screens.length) {
-          _currentIndex = 0;
-        }
-
         return Scaffold(
           body: IndexedStack(
             index: _currentIndex,
             children: screens,
           ),
-          bottomNavigationBar: _buildCustomBottomNav(navItems),
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, -5),
+                ),
+              ],
+            ),
+            child: BottomNavigationBar(
+              currentIndex: _currentIndex,
+              onTap: (index) {
+                if (index < navItems.length) {
+                  setState(() => _currentIndex = index);
+                }
+              },
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.white,
+              selectedItemColor: AppThemeColors.primary,
+              unselectedItemColor: AppThemeColors.textSecondary,
+              selectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+              ),
+              unselectedLabelStyle: const TextStyle(fontSize: 11),
+              items: navItems,
+            ),
+          ),
         );
       },
-    );
-  }
-
-  Widget _buildCustomBottomNav(List<BottomNavigationBarItem> navItems) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Container(
-          height: 64,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(navItems.length, (index) {
-              final item = navItems[index];
-              final isSelected = _currentIndex == index;
-
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() => _currentIndex = index);
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconTheme(
-                        data: IconThemeData(
-                          color: isSelected
-                              ? AppThemeColors.primary
-                              : AppThemeColors.textSecondary,
-                          size: 24,
-                        ),
-                        child: isSelected ? item.activeIcon : item.icon,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.label ?? '',
-                        style: AppTypography.labelSmall.copyWith(
-                          color: isSelected
-                              ? AppThemeColors.primary
-                              : AppThemeColors.textSecondary,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.normal,
-                          fontSize: 11,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-          ),
-        ),
-      ),
     );
   }
 }

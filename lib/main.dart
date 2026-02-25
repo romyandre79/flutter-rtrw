@@ -16,6 +16,9 @@ import 'package:flutter_pos/data/repositories/auth_repository.dart';
 import 'package:flutter_pos/data/repositories/report_repository.dart';
 import 'package:flutter_pos/data/repositories/user_repository.dart';
 import 'package:flutter_pos/data/repositories/unit_repository.dart';
+import 'package:flutter_pos/data/repositories/warga_repository.dart';
+import 'package:flutter_pos/data/repositories/rumah_repository.dart';
+import 'package:flutter_pos/data/repositories/pengurus_repository.dart';
 import 'package:flutter_pos/core/api/api_service.dart';
 import 'package:flutter_pos/core/services/notification_service.dart';
 import 'package:flutter_pos/core/services/sync_service.dart';
@@ -63,6 +66,9 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(create: (_) => ReportRepository()),
         RepositoryProvider(create: (_) => UserRepository()),
         RepositoryProvider(create: (_) => UnitRepository()),
+        RepositoryProvider(create: (_) => WargaRepository()),
+        RepositoryProvider(create: (_) => RumahRepository()),
+        RepositoryProvider(create: (_) => PengurusRepository()),
         RepositoryProvider(create: (_) => ApiService()),
         RepositoryProvider(
           create: (context) => SyncService(
@@ -90,7 +96,7 @@ class MyApp extends StatelessWidget {
           ),
         ],
         child: MaterialApp(
-          title: 'POS',
+          title: 'Sistem Informasi RT/RW',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           home: AuthWrapper(showOnboarding: showOnboarding),

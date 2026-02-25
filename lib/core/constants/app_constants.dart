@@ -2,21 +2,19 @@ class AppConstants {
   AppConstants._();
 
   // App Info
-  static const String appName = 'Kreatif MajuMU - POS';
+  static const String appName = 'Kreatif MajuMU - RT RW';
   static const String appVersion = '1.0.0';
-  static const String appDescription = 'Aplikasi Kasir POS - Full, Jalan Tanpa Internet!';
+  static const String appDescription = 'Aplikasi Kreatif RT/RW - Full, Jalan Tanpa Internet!';
 
   // Database
-  static const String databaseName = 'pos.db';
+  static const String databaseName = 'kreatifrtwrw.db';
   static const int databaseVersion = 7;
 
-  // Invoice
-  static const String defaultInvoicePrefix = 'POS';
+  // Surat Keluar
+  static const String defaultSuratKeluarPrefix = 'SKel';
   static const int invoiceNumberLength = 6;
 
   // Default Values
-  static const String defaultPaymentMethod = 'cash';
-  static const int defaultServiceDuration = 1; // POS usually instant, but keep for compatibility
   static const int defaultPageSize = 20;
   static const int recentOrdersLimit = 5;
 
@@ -43,10 +41,10 @@ class AppConstants {
   static const String defaultOwnerName = 'Administrator';
 
   // Settings Keys
-  static const String keyStoreName = 'store_name';
-  static const String keyStoreAddress = 'store_address';
-  static const String keyStorePhone = 'store_phone';
-  static const String keyInvoicePrefix = 'invoice_prefix';
+  static const String keyStoreName = 'rtrw_name';
+  static const String keyStoreAddress = 'rtrw_address';
+  static const String keyStorePhone = 'rtrw_phone';
+  static const String keyInvoicePrefix = 'surat_keluar_prefix';
   static const String keyPrinterAddress = 'printer_address';
   static const String keyLastInvoiceDate = 'last_invoice_date';
 
@@ -58,10 +56,19 @@ class AppConstants {
   static const String keyPlantCode = 'plant_code';
   static const String keyMachineNumber = 'machine_number';
 
-  // Default Store Info
-  static const String defaultStoreName = 'Toko Serba Ada';
-  static const String defaultStoreAddress = 'Indonesia';
-  static const String defaultStorePhone = '-';
+  // Default RT/RW Info
+  static const String defaultRTName = 'RT 01';
+  static const String defaultRWName = 'RW 01';
+  static const String defaultRTAddress = 'Indonesia';
+  static const String defaultRWAddress = 'Indonesia';
+  static const String defaultRTPhone = '-';
+  static const String defaultRWPhone = '-';
+
+  // Backward-compatible aliases
+  static const String defaultStoreName = defaultRTName;
+  static const String defaultStoreAddress = defaultRTAddress;
+  static const String defaultStorePhone = defaultRTPhone;
+  static const String defaultInvoicePrefix = defaultSuratKeluarPrefix;
   static const String defaultMachineNumber = '01';
 
   static const bool isDemo = true;

@@ -16,19 +16,18 @@ class DashboardLoading extends DashboardState {
 }
 
 class DashboardLoaded extends DashboardState {
-  final int todayRevenue;
-  final int monthOrderCount;
+  final int totalWarga;
+  final int totalRumah;
+  final int totalPengurus;
 
   const DashboardLoaded({
-    required this.todayRevenue,
-    required this.monthOrderCount,
+    required this.totalWarga,
+    required this.totalRumah,
+    required this.totalPengurus,
   });
 
   @override
-  List<Object?> get props => [
-        todayRevenue,
-        monthOrderCount,
-      ];
+  List<Object?> get props => [totalWarga, totalRumah, totalPengurus];
 }
 
 class DashboardError extends DashboardState {
