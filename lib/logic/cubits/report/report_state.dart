@@ -3,33 +3,42 @@ import 'package:equatable/equatable.dart';
 class ReportData {
   final DateTime startDate;
   final DateTime endDate;
-  final int totalOrders;
-  final int completedOrders;
-  final int pendingOrders;
-  final int totalRevenue;
-  final int totalPaid;
-  final int totalUnpaid;
-  final int totalProfit;
-  final Map<String, int> ordersByStatus;
-  final List<DailyRevenue> dailyRevenue;
-  final List<ServiceSummary> topServices;
+  final double totalIuran;
+  final double totalPengeluaran;
+  final double saldo;
+  final int jumlahIuranLunas;
+  final int jumlahIuranBelum;
+  final List<MonthlyFinance> monthlyData;
+  final Map<String, double> pengeluaranByKategori;
 
   ReportData({
     required this.startDate,
     required this.endDate,
-    required this.totalOrders,
-    required this.completedOrders,
-    required this.pendingOrders,
-    required this.totalRevenue,
-    required this.totalPaid,
-    required this.totalUnpaid,
-    this.totalProfit = 0,
-    required this.ordersByStatus,
-    required this.dailyRevenue,
-    required this.topServices,
+    required this.totalIuran,
+    required this.totalPengeluaran,
+    required this.saldo,
+    required this.jumlahIuranLunas,
+    required this.jumlahIuranBelum,
+    required this.monthlyData,
+    required this.pengeluaranByKategori,
   });
 }
 
+class MonthlyFinance {
+  final String month; // "2026-01"
+  final double iuran;
+  final double pengeluaran;
+
+  MonthlyFinance({
+    required this.month,
+    required this.iuran,
+    required this.pengeluaran,
+  });
+
+  double get saldo => iuran - pengeluaran;
+}
+
+// Keep these for backward compatibility but they won't be used
 class DailyRevenue {
   final DateTime date;
   final int revenue;

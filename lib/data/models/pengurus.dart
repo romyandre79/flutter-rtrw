@@ -8,6 +8,7 @@ class Pengurus extends Equatable {
   final String? periodeSelesai;
   final String status;
   final String? catatan;
+  final String? foto;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -24,6 +25,7 @@ class Pengurus extends Equatable {
     this.periodeSelesai,
     this.status = 'aktif',
     this.catatan,
+    this.foto,
     this.createdAt,
     this.updatedAt,
     this.wargaNama,
@@ -49,6 +51,7 @@ class Pengurus extends Equatable {
       periodeSelesai: map['periode_selesai'] as String?,
       status: (map['status'] as String?) ?? 'aktif',
       catatan: map['catatan'] as String?,
+      foto: map['foto'] as String?,
       createdAt: map['created_at'] != null
           ? DateTime.tryParse(map['created_at'] as String)
           : null,
@@ -70,6 +73,7 @@ class Pengurus extends Equatable {
       'periode_selesai': periodeSelesai,
       'status': status,
       'catatan': catatan,
+      'foto': foto,
       'updated_at': DateTime.now().toIso8601String(),
     };
   }
@@ -82,6 +86,7 @@ class Pengurus extends Equatable {
     String? periodeSelesai,
     String? status,
     String? catatan,
+    String? foto,
   }) {
     return Pengurus(
       id: id ?? this.id,
@@ -91,6 +96,7 @@ class Pengurus extends Equatable {
       periodeSelesai: periodeSelesai ?? this.periodeSelesai,
       status: status ?? this.status,
       catatan: catatan ?? this.catatan,
+      foto: foto ?? this.foto,
       createdAt: createdAt,
       updatedAt: updatedAt,
       wargaNama: wargaNama,

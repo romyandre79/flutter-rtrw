@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_pos/core/constants/app_constants.dart';
 import 'package:flutter_pos/data/models/warga.dart';
 import 'package:flutter_pos/data/repositories/warga_repository.dart';
 import 'package:flutter_pos/logic/cubits/warga/warga_state.dart';
@@ -41,6 +42,13 @@ class WargaCubit extends Cubit<WargaState> {
         await _repository.update(warga);
         emit(const WargaSaved('Data warga berhasil diperbarui'));
       } else {
+        if (AppConstants.isDemo) {
+          final count = await _repository.getCount();
+          if (count >= 10) {
+            emit(const WargaError('Anda telah melebihi batas transaksi aplikasi demo, silakan beli hubungi Sales Kreatif atau ke 081932701147'));
+            return;
+          }
+        }
         await _repository.create(warga);
         emit(const WargaSaved('Data warga berhasil ditambahkan'));
       }

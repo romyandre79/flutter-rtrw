@@ -94,6 +94,7 @@ class DatabaseHelper {
         agama TEXT,
         status_perkawinan TEXT,
         pekerjaan TEXT,
+        pendidikan TEXT,
         no_kk TEXT,
         status_kk TEXT,
         no_hp TEXT,
@@ -101,6 +102,7 @@ class DatabaseHelper {
         rt TEXT,
         rw TEXT,
         rumah_id INTEGER,
+        kepemilikan_rumah TEXT,
         foto_ktp TEXT,
         foto_kk TEXT,
         foto_profil TEXT,
@@ -122,9 +124,61 @@ class DatabaseHelper {
         periode_selesai TEXT,
         status TEXT DEFAULT 'aktif',
         catatan TEXT,
+        foto TEXT,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (warga_id) REFERENCES warga(id) ON DELETE SET NULL
+      )
+    ''');
+
+    // Iuran (Dues) table
+    await db.execute('''
+      CREATE TABLE iuran (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        warga_id INTEGER,
+        rumah_id INTEGER,
+        jenis TEXT NOT NULL DEFAULT 'bulanan',
+        keterangan TEXT,
+        jumlah REAL NOT NULL DEFAULT 0,
+        periode TEXT,
+        tanggal_bayar TEXT,
+        status_bayar TEXT DEFAULT 'belum_bayar',
+        bukti_pembayaran TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (warga_id) REFERENCES warga(id) ON DELETE SET NULL,
+        FOREIGN KEY (rumah_id) REFERENCES rumah(id) ON DELETE SET NULL
+      )
+    ''');
+
+    // Pengeluaran (Expenses) table
+    await db.execute('''
+      CREATE TABLE pengeluaran (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        kategori TEXT NOT NULL,
+        keterangan TEXT,
+        jumlah REAL NOT NULL DEFAULT 0,
+        tanggal TEXT NOT NULL,
+        bukti_pengeluaran TEXT,
+        created_by INTEGER,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+      )
+    ''');
+
+    // Denah Pin (Map pins for warga location) table
+    await db.execute('''
+      CREATE TABLE denah_pin (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        warga_id INTEGER,
+        rumah_id INTEGER,
+        x_percent REAL NOT NULL,
+        y_percent REAL NOT NULL,
+        label TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (warga_id) REFERENCES warga(id) ON DELETE CASCADE,
+        FOREIGN KEY (rumah_id) REFERENCES rumah(id) ON DELETE SET NULL
       )
     ''');
 
@@ -153,6 +207,20 @@ class DatabaseHelper {
     await db.execute('CREATE INDEX idx_pengurus_warga ON pengurus(warga_id)');
     await db.execute('CREATE INDEX idx_pengurus_jabatan ON pengurus(jabatan)');
     await db.execute('CREATE INDEX idx_pengurus_status ON pengurus(status)');
+
+    // Iuran indexes
+    await db.execute('CREATE INDEX idx_iuran_warga ON iuran(warga_id)');
+    await db.execute('CREATE INDEX idx_iuran_rumah ON iuran(rumah_id)');
+    await db.execute('CREATE INDEX idx_iuran_jenis ON iuran(jenis)');
+    await db.execute('CREATE INDEX idx_iuran_periode ON iuran(periode)');
+    await db.execute('CREATE INDEX idx_iuran_status ON iuran(status_bayar)');
+
+    // Pengeluaran indexes
+    await db.execute('CREATE INDEX idx_pengeluaran_kategori ON pengeluaran(kategori)');
+    await db.execute('CREATE INDEX idx_pengeluaran_tanggal ON pengeluaran(tanggal)');
+
+    // Denah Pin indexes
+    await db.execute('CREATE INDEX idx_denah_pin_warga ON denah_pin(warga_id)');
   }
 
   Future<void> _seedData(Database db) async {
@@ -186,7 +254,101 @@ class DatabaseHelper {
   }
 
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
-    // Future migrations go here
+    if (oldVersion < 8) {
+      // Add foto column to pengurus
+      await db.execute('ALTER TABLE pengurus ADD COLUMN foto TEXT');
+      // Create iuran table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS iuran (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          warga_id INTEGER,
+          rumah_id INTEGER,
+          jenis TEXT NOT NULL DEFAULT 'bulanan',
+          keterangan TEXT,
+          jumlah REAL NOT NULL DEFAULT 0,
+          periode TEXT,
+          tanggal_bayar TEXT,
+          status_bayar TEXT DEFAULT 'belum_bayar',
+          bukti_pembayaran TEXT,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (warga_id) REFERENCES warga(id) ON DELETE SET NULL,
+          FOREIGN KEY (rumah_id) REFERENCES rumah(id) ON DELETE SET NULL
+        )
+      ''');
+      // Create pengeluaran table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS pengeluaran (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          kategori TEXT NOT NULL,
+          keterangan TEXT,
+          jumlah REAL NOT NULL DEFAULT 0,
+          tanggal TEXT NOT NULL,
+          bukti_pengeluaran TEXT,
+          created_by INTEGER,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+        )
+      ''');
+      // Create indexes for new tables
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_iuran_warga ON iuran(warga_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_iuran_rumah ON iuran(rumah_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_iuran_jenis ON iuran(jenis)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_iuran_periode ON iuran(periode)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_iuran_status ON iuran(status_bayar)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_pengeluaran_kategori ON pengeluaran(kategori)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_pengeluaran_tanggal ON pengeluaran(tanggal)');
+      // Create denah_pin table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS denah_pin (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          warga_id INTEGER,
+          rumah_id INTEGER,
+          x_percent REAL NOT NULL,
+          y_percent REAL NOT NULL,
+          label TEXT,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (warga_id) REFERENCES warga(id) ON DELETE CASCADE,
+          FOREIGN KEY (rumah_id) REFERENCES rumah(id) ON DELETE SET NULL
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_denah_pin_warga ON denah_pin(warga_id)');
+    }
+
+    if (oldVersion < 9) {
+      // Create denah_pin table (for users who already migrated to v8)
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS denah_pin (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          warga_id INTEGER,
+          rumah_id INTEGER,
+          x_percent REAL NOT NULL,
+          y_percent REAL NOT NULL,
+          label TEXT,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (warga_id) REFERENCES warga(id) ON DELETE CASCADE,
+          FOREIGN KEY (rumah_id) REFERENCES rumah(id) ON DELETE SET NULL
+        )
+      ''');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_denah_pin_warga ON denah_pin(warga_id)');
+    }
+
+    if (oldVersion < 10) {
+      try {
+        await db.execute('ALTER TABLE warga ADD COLUMN kepemilikan_rumah TEXT');
+      } catch (e) {
+        // Ignore if exists
+      }
+    }
+
+    if (oldVersion < 11) {
+      try {
+        await db.execute('ALTER TABLE warga ADD COLUMN pendidikan TEXT');
+      } catch (e) {
+        // Ignore if exists
+      }
+    }
   }
 
   Future<String> getDbPath() async {
@@ -207,8 +369,7 @@ class DatabaseHelper {
   }
 
   Future<void> deleteDatabase() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, AppConstants.databaseName);
+    final path = await getDbPath();
     await databaseFactory.deleteDatabase(path);
     _database = null;
   }

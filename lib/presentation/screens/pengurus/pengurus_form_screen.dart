@@ -1,5 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:flutter_pos/core/theme/app_theme.dart';
 import 'package:flutter_pos/data/models/pengurus.dart';
 import 'package:flutter_pos/data/models/warga.dart';
@@ -27,6 +31,8 @@ class _PengurusFormScreenState extends State<PengurusFormScreen> {
   String? _selectedWargaNama;
 
   final _wargaRepo = WargaRepository();
+  String? _fotoPath;
+  final _picker = ImagePicker();
 
   bool get _isEditing => widget.pengurus != null;
 
@@ -42,6 +48,7 @@ class _PengurusFormScreenState extends State<PengurusFormScreen> {
       _status = p.status;
       _selectedWargaId = p.wargaId;
       _selectedWargaNama = p.wargaNama;
+      _fotoPath = p.foto;
     }
   }
 
@@ -64,6 +71,7 @@ class _PengurusFormScreenState extends State<PengurusFormScreen> {
       periodeSelesai: _periodeSelesaiController.text.isEmpty ? null : _periodeSelesaiController.text,
       status: _status,
       catatan: _catatanController.text.isEmpty ? null : _catatanController.text,
+      foto: _fotoPath,
     );
 
     context.read<PengurusCubit>().save(pengurus);
@@ -145,6 +153,34 @@ class _PengurusFormScreenState extends State<PengurusFormScreen> {
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
               // Warga picker
+              _sectionTitle('Foto Pengurus'),
+              const SizedBox(height: AppSpacing.md),
+              GestureDetector(
+                onTap: _pickFoto,
+                child: Container(
+                  height: 150,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppThemeColors.border, width: 2),
+                    image: _fotoPath != null && File(_fotoPath!).existsSync()
+                        ? DecorationImage(image: FileImage(File(_fotoPath!)), fit: BoxFit.cover)
+                        : null,
+                  ),
+                  child: _fotoPath == null || !File(_fotoPath!).existsSync()
+                      ? const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add_a_photo_outlined, size: 40, color: AppThemeColors.textSecondary),
+                            SizedBox(height: 8),
+                            Text('Tambah Foto', style: TextStyle(color: AppThemeColors.textSecondary)),
+                          ],
+                        )
+                      : null,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
               _sectionTitle('Data Warga'),
               const SizedBox(height: AppSpacing.md),
               InkWell(
@@ -215,6 +251,20 @@ class _PengurusFormScreenState extends State<PengurusFormScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _pickFoto() async {
+    final picked = await _picker.pickImage(source: ImageSource.gallery, maxWidth: 1200);
+    if (picked == null) return;
+
+    final appDir = await getApplicationDocumentsDirectory();
+    final photosDir = Directory('${appDir.path}/photos/pengurus');
+    if (!await photosDir.exists()) await photosDir.create(recursive: true);
+
+    final ext = p.extension(picked.path);
+    final fileName = 'pengurus_${DateTime.now().millisecondsSinceEpoch}$ext';
+    final savedFile = await File(picked.path).copy('${photosDir.path}/$fileName');
+    setState(() => _fotoPath = savedFile.path);
   }
 
   Widget _sectionTitle(String title) {

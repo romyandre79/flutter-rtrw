@@ -6,6 +6,7 @@ class StoreInfo {
   final String phone;
   final String invoicePrefix;
   final String machineNumber;
+  final double iuranBulanan;
 
   const StoreInfo({
     required this.name,
@@ -13,6 +14,7 @@ class StoreInfo {
     required this.phone,
     required this.invoicePrefix,
     required this.machineNumber,
+    this.iuranBulanan = 0,
   });
 
   StoreInfo copyWith({
@@ -21,6 +23,7 @@ class StoreInfo {
     String? phone,
     String? invoicePrefix,
     String? machineNumber,
+    double? iuranBulanan,
   }) {
     return StoreInfo(
       name: name ?? this.name,
@@ -28,6 +31,7 @@ class StoreInfo {
       phone: phone ?? this.phone,
       invoicePrefix: invoicePrefix ?? this.invoicePrefix,
       machineNumber: machineNumber ?? this.machineNumber,
+      iuranBulanan: iuranBulanan ?? this.iuranBulanan,
     );
   }
 }

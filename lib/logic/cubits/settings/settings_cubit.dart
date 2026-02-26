@@ -33,6 +33,7 @@ class SettingsCubit extends Cubit<SettingsState> {
             AppConstants.defaultInvoicePrefix,
         machineNumber: settings[AppConstants.keyMachineNumber] ??
             AppConstants.defaultMachineNumber,
+        iuranBulanan: double.tryParse(settings[AppConstants.keyIuranBulanan] ?? '0') ?? 0,
       );
 
       final plantInfo = PlantInfo(
@@ -120,7 +121,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       _currentPlantInfo = updatedInfo;
 
       emit(SettingsUpdated(
-        message: 'Kode plant berhasil diperbarui',
+        message: 'Kode RT berhasil diperbarui',
         storeInfo: _currentInfo!,
         plantInfo: updatedInfo,
       ));
@@ -131,7 +132,7 @@ class SettingsCubit extends Cubit<SettingsState> {
 
   Future<void> updateStoreName(String name) async {
     if (name.trim().isEmpty) {
-      emit(const SettingsError(message: 'Nama toko tidak boleh kosong'));
+      emit(const SettingsError(message: 'Nama RT tidak boleh kosong'));
       return;
     }
 
@@ -144,7 +145,7 @@ class SettingsCubit extends Cubit<SettingsState> {
       _currentInfo = updatedInfo;
 
       emit(SettingsUpdated(
-        message: 'Nama toko berhasil diperbarui',
+        message: 'Nama RT berhasil diperbarui',
         storeInfo: updatedInfo,
         plantInfo: _currentPlantInfo,
       ));
@@ -232,6 +233,31 @@ class SettingsCubit extends Cubit<SettingsState> {
     } catch (e) {
       emit(SettingsError(
           message: 'Gagal memperbarui prefix invoice: ${e.toString()}'));
+    }
+  }
+  Future<void> updateIuranBulanan(double amount) async {
+    if (amount < 0) {
+      emit(const SettingsError(message: 'Nominal tidak boleh negatif'));
+      return;
+    }
+
+    emit(SettingsUpdating());
+
+    try {
+      await _repository.setSetting(
+          AppConstants.keyIuranBulanan, amount.toString());
+
+      final updatedInfo = _currentInfo!.copyWith(iuranBulanan: amount);
+      _currentInfo = updatedInfo;
+
+      emit(SettingsUpdated(
+        message: 'Master Iuran Bulanan berhasil diperbarui',
+        storeInfo: updatedInfo,
+        plantInfo: _currentPlantInfo,
+      ));
+    } catch (e) {
+      emit(SettingsError(
+          message: 'Gagal memperbarui Iuran Bulanan: ${e.toString()}'));
     }
   }
 }

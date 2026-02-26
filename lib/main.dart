@@ -158,7 +158,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
                       boxShadow: AppShadows.medium,
                     ),
                     child: Image.asset(
-                      'assets/icons/logopos.png',
+                      'assets/icons/logortrw.png',
                       fit: BoxFit.contain,
                     ),
                   ),

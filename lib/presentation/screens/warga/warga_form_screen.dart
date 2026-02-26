@@ -6,12 +6,15 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter_pos/core/theme/app_theme.dart';
 import 'package:flutter_pos/data/models/warga.dart';
+import 'package:flutter_pos/data/repositories/warga_repository.dart';
 import 'package:flutter_pos/logic/cubits/warga/warga_cubit.dart';
 import 'package:flutter_pos/logic/cubits/warga/warga_state.dart';
 
 class WargaFormScreen extends StatefulWidget {
   final Warga? warga;
-  const WargaFormScreen({super.key, this.warga});
+  final String? prefillNoKk;
+  final String? prefillNamaWarga;
+  const WargaFormScreen({super.key, this.warga, this.prefillNoKk, this.prefillNamaWarga});
 
   @override
   State<WargaFormScreen> createState() => _WargaFormScreenState();
@@ -23,6 +26,7 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
   final _namaController = TextEditingController();
   final _tempatLahirController = TextEditingController();
   final _pekerjaanController = TextEditingController();
+  final _pendidikanController = TextEditingController();
   final _noKkController = TextEditingController();
   final _noHpController = TextEditingController();
   final _alamatController = TextEditingController();
@@ -35,6 +39,7 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
   String? _agama;
   String? _statusPerkawinan;
   String? _statusKk;
+  String? _kepemilikanRumah;
   StatusWarga _status = StatusWarga.aktif;
 
   String? _fotoKtpPath;
@@ -42,8 +47,10 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
   String? _fotoProfilPath;
 
   final _picker = ImagePicker();
+  List<Warga> _keluarga = [];
 
   bool get _isEditing => widget.warga != null;
+  bool get _isAddingFamily => widget.prefillNoKk != null && !_isEditing;
 
   @override
   void initState() {
@@ -54,6 +61,7 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
       _namaController.text = w.nama;
       _tempatLahirController.text = w.tempatLahir ?? '';
       _pekerjaanController.text = w.pekerjaan ?? '';
+      _pendidikanController.text = w.pendidikan ?? '';
       _noKkController.text = w.noKk ?? '';
       _noHpController.text = w.noHp ?? '';
       _alamatController.text = w.alamat ?? '';
@@ -65,10 +73,29 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
       _agama = w.agama;
       _statusPerkawinan = w.statusPerkawinan;
       _statusKk = w.statusKk;
+      _kepemilikanRumah = w.kepemilikanRumah;
       _status = w.status;
       _fotoKtpPath = w.fotoKtp;
       _fotoKkPath = w.fotoKk;
       _fotoProfilPath = w.fotoProfil;
+    }
+    // Pre-fill no_kk if provided (when adding family member)
+    if (widget.prefillNoKk != null && _noKkController.text.isEmpty) {
+      _noKkController.text = widget.prefillNoKk!;
+    }
+    _loadKeluarga();
+  }
+
+  Future<void> _loadKeluarga() async {
+    final noKk = _noKkController.text;
+    if (noKk.isEmpty) return;
+    final repo = WargaRepository();
+    final members = await repo.getKeluarga(noKk);
+    // Exclude current warga from the list
+    if (mounted) {
+      setState(() {
+        _keluarga = members.where((w) => w.id != widget.warga?.id).toList();
+      });
     }
   }
 
@@ -78,6 +105,7 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
     _namaController.dispose();
     _tempatLahirController.dispose();
     _pekerjaanController.dispose();
+    _pendidikanController.dispose();
     _noKkController.dispose();
     _noHpController.dispose();
     _alamatController.dispose();
@@ -114,6 +142,7 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
       agama: _agama,
       statusPerkawinan: _statusPerkawinan,
       pekerjaan: _pekerjaanController.text.isEmpty ? null : _pekerjaanController.text,
+      pendidikan: _pendidikanController.text.isEmpty ? null : _pendidikanController.text,
       noKk: _noKkController.text.isEmpty ? null : _noKkController.text,
       statusKk: _statusKk,
       noHp: _noHpController.text.isEmpty ? null : _noHpController.text,
@@ -121,6 +150,7 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
       rt: _rtController.text.isEmpty ? null : _rtController.text,
       rw: _rwController.text.isEmpty ? null : _rwController.text,
       rumahId: widget.warga?.rumahId,
+      kepemilikanRumah: _kepemilikanRumah,
       fotoKtp: _fotoKtpPath,
       fotoKk: _fotoKkPath,
       fotoProfil: _fotoProfilPath,
@@ -149,7 +179,9 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
       child: Scaffold(
         backgroundColor: AppThemeColors.background,
         appBar: AppBar(
-          title: Text(_isEditing ? 'Edit Warga' : 'Tambah Warga'),
+          title: Text(_isAddingFamily
+              ? 'Anggota Keluarga ${widget.prefillNamaWarga ?? ""}'
+              : _isEditing ? 'Edit Warga' : 'Tambah Warga'),
           backgroundColor: AppThemeColors.primary,
           foregroundColor: Colors.white,
           actions: [
@@ -203,11 +235,24 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
                 (v) => setState(() => _statusPerkawinan = v),
               ),
               _buildTextField(_pekerjaanController, 'Pekerjaan'),
+              _buildDropdown<String>(
+                'Pendidikan Terakhir',
+                _pendidikanController.text.isEmpty ? null : _pendidikanController.text,
+                const ['Tidak/Belum Sekolah', 'SD/Sederajat', 'SMP/Sederajat', 'SMA/Sederajat', 'D1', 'D2', 'D3', 'S1', 'S2', 'S3'],
+                (v) => v,
+                (v) => setState(() => _pendidikanController.text = v ?? ''),
+              ),
 
               const SizedBox(height: AppSpacing.xl),
               _sectionTitle('Data Keluarga'),
               const SizedBox(height: AppSpacing.md),
-              _buildTextField(_noKkController, 'No. Kartu Keluarga', keyboardType: TextInputType.number, maxLength: 16),
+              _buildTextField(
+                _noKkController,
+                'No. Kartu Keluarga',
+                keyboardType: TextInputType.number,
+                maxLength: 16,
+                readOnly: _isAddingFamily,
+              ),
               _buildDropdown<String>(
                 'Status dalam KK',
                 _statusKk,
@@ -215,19 +260,33 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
                 (v) => v,
                 (v) => setState(() => _statusKk = v),
               ),
+              // Family members section
+              if (_isEditing && _noKkController.text.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.md),
+                _buildKeluargaSection(),
+              ],
 
               const SizedBox(height: AppSpacing.xl),
               _sectionTitle('Kontak & Alamat'),
               const SizedBox(height: AppSpacing.md),
               _buildTextField(_noHpController, 'No. HP', keyboardType: TextInputType.phone),
-              _buildTextField(_alamatController, 'Alamat', maxLines: 2),
-              Row(
-                children: [
-                  Expanded(child: _buildTextField(_rtController, 'RT')),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(child: _buildTextField(_rwController, 'RW')),
-                ],
-              ),
+              if (!_isAddingFamily) ...[
+                _buildTextField(_alamatController, 'Alamat', maxLines: 2),
+                Row(
+                  children: [
+                    Expanded(child: _buildTextField(_rtController, 'RT')),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(child: _buildTextField(_rwController, 'RW')),
+                  ],
+                ),
+                _buildDropdown<String>(
+                  'Kepemilikan Rumah',
+                  _kepemilikanRumah,
+                  const ['Milik Sendiri', 'Sewa/Kontrak', 'Numpang', 'Dinas', 'Lainnya'],
+                  (v) => v,
+                  (v) => setState(() => _kepemilikanRumah = v),
+                ),
+              ],
 
               const SizedBox(height: AppSpacing.xl),
               _sectionTitle('Status & Catatan'),
@@ -278,10 +337,11 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
           final path = await _pickAndSaveImage('ktp');
           if (path != null) setState(() => _fotoKtpPath = path);
         }),
-        _buildPhotoTile('Foto KK', _fotoKkPath, () async {
-          final path = await _pickAndSaveImage('kk');
-          if (path != null) setState(() => _fotoKkPath = path);
-        }),
+        if (!_isAddingFamily)
+          _buildPhotoTile('Foto KK', _fotoKkPath, () async {
+            final path = await _pickAndSaveImage('kk');
+            if (path != null) setState(() => _fotoKkPath = path);
+          }),
       ],
     );
   }
@@ -322,6 +382,7 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
     TextInputType? keyboardType,
     int? maxLength,
     int maxLines = 1,
+    bool readOnly = false,
     String? Function(String?)? validator,
   }) {
     return Padding(
@@ -331,6 +392,7 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
         keyboardType: keyboardType,
         maxLength: maxLength,
         maxLines: maxLines,
+        readOnly: readOnly,
         validator: validator,
         decoration: InputDecoration(
           labelText: label,
@@ -406,6 +468,84 @@ class _WargaFormScreenState extends State<WargaFormScreen> {
             },
             child: const Text('Hapus', style: TextStyle(color: AppThemeColors.error)),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildKeluargaSection() {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppThemeColors.primarySurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppThemeColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Anggota Keluarga (${_keluarga.length})',
+                style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold, color: AppThemeColors.primary),
+              ),
+              TextButton.icon(
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider(
+                        create: (_) => WargaCubit(),
+                        child: WargaFormScreen(
+                          prefillNoKk: _noKkController.text,
+                          prefillNamaWarga: widget.warga?.nama,
+                        ),
+                      ),
+                    ),
+                  );
+                  _loadKeluarga();
+                },
+                icon: const Icon(Icons.person_add, size: 18),
+                label: const Text('Tambah'),
+                style: TextButton.styleFrom(foregroundColor: AppThemeColors.primary),
+              ),
+            ],
+          ),
+          if (_keluarga.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+              child: Text(
+                'Belum ada anggota keluarga lain',
+                style: AppTypography.bodySmall.copyWith(color: AppThemeColors.textSecondary),
+              ),
+            )
+          else
+            ..._keluarga.map((w) => ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              leading: CircleAvatar(
+                radius: 16,
+                backgroundColor: AppThemeColors.primary,
+                child: Text(w.nama[0], style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+              ),
+              title: Text(w.nama, style: AppTypography.bodyMedium),
+              subtitle: Text(w.statusKk ?? '-', style: AppTypography.bodySmall.copyWith(color: AppThemeColors.textSecondary)),
+              trailing: Text(w.jenisKelaminDisplay, style: AppTypography.labelSmall),
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider(
+                      create: (_) => WargaCubit(),
+                      child: WargaFormScreen(warga: w),
+                    ),
+                  ),
+                );
+                _loadKeluarga();
+              },
+            )),
         ],
       ),
     );

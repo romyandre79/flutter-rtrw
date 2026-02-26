@@ -1,5 +1,5 @@
 name: flutter_pos
-description: "Aplikasi Kasir POS"
+description: "Aplikasi RT"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -43,6 +43,7 @@ dependencies:
 
 dev_dependencies:
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
 
@@ -51,11 +52,11 @@ flutter_launcher_icons:
   ios: true
   windows:
     generate: true
-    image_path: "assets/icons/logopos.png"
+    image_path: "assets/icons/logortrw.png"
     icon_size: 48
-  image_path: "assets/icons/logopos.png"
+  image_path: "assets/icons/logortrw.png"
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/icons/logopos.png"
+  adaptive_icon_foreground: "assets/icons/logortrw.png"
 
 flutter:
   uses-material-design: true

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter_pos/core/api/api_config.dart';
 import 'package:flutter_pos/core/constants/app_constants.dart';
+import 'package:flutter_pos/core/utils/currency_formatter.dart';
 import 'package:flutter_pos/core/theme/app_theme.dart';
 import 'package:flutter_pos/data/models/user.dart';
 import 'package:flutter_pos/logic/cubits/auth/auth_cubit.dart';
@@ -335,7 +336,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildAboutRow('Creator', 'Kreatif MajuMU'),
+            _buildAboutRow('Creator', 'Kreatif'),
             const SizedBox(height: AppSpacing.md),
             _buildAboutRow('PhoneNo', '081932701147'),
             const SizedBox(height: AppSpacing.md),
@@ -510,7 +511,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               _buildSettingTile(
                                 context: context,
                                 icon: Icons.store,
-                                title: 'Nama Toko',
+                                title: 'Nama RT',
                                 subtitle:
                                     storeInfo?.name ??
                                     AppConstants.defaultStoreName,
@@ -569,19 +570,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               _buildSettingTile(
                                   context: context,
                                   icon: Icons.confirmation_number,
-                                  title: 'Kode Toko',
+                                  title: 'Kode RT',
                                   subtitle: plantInfo?.code.isNotEmpty == true
                                       ? plantInfo!.code
                                       : '-',
                                   onTap: () => _showEditDialog(
-                                    title: 'Edit Kode Toko',
+                                    title: 'Edit Kode RT',
                                     currentValue: plantInfo?.code ?? '',
-                                    hint: 'Masukkan Kode Toko',
+                                    hint: 'Masukkan Kode RT',
                                     icon: Icons.confirmation_number,
                                     onSave: (value) =>
                                         _settingsCubit.updatePlantCode(value),
                                   ),
                                 ),
+                              _buildDivider(),
+                              _buildSettingTile(
+                                context: context,
+                                icon: Icons.attach_money,
+                                title: 'Master Iuran Bulanan',
+                                subtitle: CurrencyFormatter.format(storeInfo?.iuranBulanan.toInt() ?? 0),
+                                onTap: () => _showEditDialog(
+                                  title: 'Edit Iuran Bulanan',
+                                  currentValue: storeInfo?.iuranBulanan.toInt().toString() ?? '0',
+                                  hint: 'Masukkan nominal iuran bulanan',
+                                  icon: Icons.attach_money,
+                                  keyboardType: TextInputType.number,
+                                  onSave: (value) => _settingsCubit
+                                      .updateIuranBulanan(double.tryParse(value) ?? 0),
+                                ),
+                              ),
                             ],
                           ),
 

@@ -42,21 +42,26 @@ class ExportService {
     }
   }
 
-  /// Export report to Excel (Summary report)
+  /// Export financial report to Excel
   Future<String> exportReportToExcel(ReportData reportData) async {
     final excel = Excel.createExcel();
 
-    // Sheet 1: Summary
-    _createSummarySheet(excel, reportData);
+    // Sheet 1: Ringkasan Keuangan
+    _createFinancialSummarySheet(excel, reportData);
 
-    // Sheet 2: Service Summary
-    _createServiceSummarySheet(excel, reportData);
+    // Sheet 2: Pengeluaran per Kategori
+    _createKategoriSheet(excel, reportData);
+
+    // Sheet 3: Tren Bulanan
+    if (reportData.monthlyData.isNotEmpty) {
+      _createMonthlySheet(excel, reportData);
+    }
 
     excel.delete('Sheet1');
 
     final directory = await getApplicationDocumentsDirectory();
     final fileName =
-        'Laporan_${DateFormatter.formatDateCompact(reportData.startDate)}_${DateFormatter.formatDateCompact(reportData.endDate)}.xlsx';
+        'Laporan_Keuangan_${DateFormatter.formatDateCompact(reportData.startDate)}_${DateFormatter.formatDateCompact(reportData.endDate)}.xlsx';
     final filePath = '${directory.path}/$fileName';
 
     final fileBytes = excel.save();
@@ -69,69 +74,64 @@ class ExportService {
     throw Exception('Gagal membuat file Excel');
   }
 
-  void _createSummarySheet(Excel excel, ReportData reportData) {
-    final sheet = excel['Ringkasan'];
+  void _createFinancialSummarySheet(Excel excel, ReportData reportData) {
+    final sheet = excel['Ringkasan Keuangan'];
 
-    sheet.cell(CellIndex.indexByString('A1')).value = TextCellValue('LAPORAN TRANSAKSI');
+    sheet.cell(CellIndex.indexByString('A1')).value = TextCellValue('LAPORAN KEUANGAN RT/RW');
     sheet.cell(CellIndex.indexByString('A2')).value = TextCellValue(
         'Periode: ${DateFormatter.formatDate(reportData.startDate)} - ${DateFormatter.formatDate(reportData.endDate)}');
 
-    sheet.cell(CellIndex.indexByString('A4')).value = TextCellValue('Ringkasan');
+    sheet.cell(CellIndex.indexByString('A4')).value = TextCellValue('Total Iuran (Pemasukan)');
+    sheet.cell(CellIndex.indexByString('B4')).value =
+        TextCellValue(CurrencyFormatter.format(reportData.totalIuran.toInt()));
 
-    sheet.cell(CellIndex.indexByString('A6')).value = TextCellValue('Total Penjualan');
-    sheet.cell(CellIndex.indexByString('B6')).value = IntCellValue(reportData.totalOrders);
+    sheet.cell(CellIndex.indexByString('A5')).value = TextCellValue('Total Pengeluaran');
+    sheet.cell(CellIndex.indexByString('B5')).value =
+        TextCellValue(CurrencyFormatter.format(reportData.totalPengeluaran.toInt()));
 
-    sheet.cell(CellIndex.indexByString('A7')).value = TextCellValue('Penjualan Selesai');
-    sheet.cell(CellIndex.indexByString('B7')).value = IntCellValue(reportData.completedOrders);
+    sheet.cell(CellIndex.indexByString('A6')).value = TextCellValue('Saldo');
+    sheet.cell(CellIndex.indexByString('B6')).value =
+        TextCellValue(CurrencyFormatter.format(reportData.saldo.toInt()));
 
-    sheet.cell(CellIndex.indexByString('A8')).value = TextCellValue('Penjualan Pending');
-    sheet.cell(CellIndex.indexByString('B8')).value = IntCellValue(reportData.pendingOrders);
+    sheet.cell(CellIndex.indexByString('A8')).value = TextCellValue('Iuran Lunas');
+    sheet.cell(CellIndex.indexByString('B8')).value = IntCellValue(reportData.jumlahIuranLunas);
 
-    sheet.cell(CellIndex.indexByString('A10')).value = TextCellValue('Total Omzet');
-    sheet.cell(CellIndex.indexByString('B10')).value =
-        TextCellValue(CurrencyFormatter.format(reportData.totalRevenue));
+    sheet.cell(CellIndex.indexByString('A9')).value = TextCellValue('Iuran Belum Bayar');
+    sheet.cell(CellIndex.indexByString('B9')).value = IntCellValue(reportData.jumlahIuranBelum);
+  }
 
-    sheet.cell(CellIndex.indexByString('A11')).value = TextCellValue('Total Dibayar');
-    sheet.cell(CellIndex.indexByString('B11')).value =
-        TextCellValue(CurrencyFormatter.format(reportData.totalPaid));
+  void _createKategoriSheet(Excel excel, ReportData reportData) {
+    final sheet = excel['Pengeluaran per Kategori'];
 
-    sheet.cell(CellIndex.indexByString('A12')).value = TextCellValue('Total Belum Dibayar');
-    sheet.cell(CellIndex.indexByString('B12')).value =
-        TextCellValue(CurrencyFormatter.format(reportData.totalUnpaid));
+    sheet.cell(CellIndex.indexByString('A1')).value = TextCellValue('Kategori');
+    sheet.cell(CellIndex.indexByString('B1')).value = TextCellValue('Jumlah');
 
-    sheet.cell(CellIndex.indexByString('A14')).value = TextCellValue('Laporan Harian');
-
-    sheet.cell(CellIndex.indexByString('A15')).value = TextCellValue('Tanggal');
-    sheet.cell(CellIndex.indexByString('B15')).value = TextCellValue('Jumlah Penjualan');
-    sheet.cell(CellIndex.indexByString('C15')).value = TextCellValue('Omzet');
-    sheet.cell(CellIndex.indexByString('D15')).value = TextCellValue('Dibayar');
-
-    int row = 16;
-    for (final daily in reportData.dailyRevenue) {
-      sheet.cell(CellIndex.indexByString('A$row')).value =
-          TextCellValue(DateFormatter.formatDate(daily.date));
-      sheet.cell(CellIndex.indexByString('B$row')).value = IntCellValue(daily.orderCount);
-      sheet.cell(CellIndex.indexByString('C$row')).value =
-          TextCellValue(CurrencyFormatter.format(daily.revenue));
-      sheet.cell(CellIndex.indexByString('D$row')).value =
-          TextCellValue(CurrencyFormatter.format(daily.paid));
+    int row = 2;
+    for (final entry in reportData.pengeluaranByKategori.entries) {
+      sheet.cell(CellIndex.indexByString('A$row')).value = TextCellValue(entry.key);
+      sheet.cell(CellIndex.indexByString('B$row')).value =
+          TextCellValue(CurrencyFormatter.format(entry.value.toInt()));
       row++;
     }
   }
 
-  void _createServiceSummarySheet(Excel excel, ReportData reportData) {
-    final sheet = excel['Layanan Terlaris'];
+  void _createMonthlySheet(Excel excel, ReportData reportData) {
+    final sheet = excel['Tren Bulanan'];
 
-    sheet.cell(CellIndex.indexByString('A1')).value = TextCellValue('Nama Layanan');
-    sheet.cell(CellIndex.indexByString('B1')).value = TextCellValue('Jumlah');
-    sheet.cell(CellIndex.indexByString('C1')).value = TextCellValue('Pendapatan');
+    sheet.cell(CellIndex.indexByString('A1')).value = TextCellValue('Bulan');
+    sheet.cell(CellIndex.indexByString('B1')).value = TextCellValue('Iuran');
+    sheet.cell(CellIndex.indexByString('C1')).value = TextCellValue('Pengeluaran');
+    sheet.cell(CellIndex.indexByString('D1')).value = TextCellValue('Saldo');
 
     int row = 2;
-    for (final service in reportData.topServices) {
-      sheet.cell(CellIndex.indexByString('A$row')).value = TextCellValue(service.serviceName);
-      sheet.cell(CellIndex.indexByString('B$row')).value = IntCellValue(service.totalQuantity);
+    for (final m in reportData.monthlyData) {
+      sheet.cell(CellIndex.indexByString('A$row')).value = TextCellValue(m.month);
+      sheet.cell(CellIndex.indexByString('B$row')).value =
+          TextCellValue(CurrencyFormatter.format(m.iuran.toInt()));
       sheet.cell(CellIndex.indexByString('C$row')).value =
-          TextCellValue(CurrencyFormatter.format(service.totalRevenue));
+          TextCellValue(CurrencyFormatter.format(m.pengeluaran.toInt()));
+      sheet.cell(CellIndex.indexByString('D$row')).value =
+          TextCellValue(CurrencyFormatter.format(m.saldo.toInt()));
       row++;
     }
   }

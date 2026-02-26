@@ -16,6 +16,7 @@ class Warga extends Equatable {
   final String? agama;
   final String? statusPerkawinan;
   final String? pekerjaan;
+  final String? pendidikan;
   final String? noKk;
   final String? statusKk;
   final String? noHp;
@@ -23,6 +24,7 @@ class Warga extends Equatable {
   final String? rt;
   final String? rw;
   final int? rumahId;
+  final String? kepemilikanRumah;
   final String? fotoKtp;
   final String? fotoKk;
   final String? fotoProfil;
@@ -41,6 +43,7 @@ class Warga extends Equatable {
     this.agama,
     this.statusPerkawinan,
     this.pekerjaan,
+    this.pendidikan,
     this.noKk,
     this.statusKk,
     this.noHp,
@@ -48,6 +51,7 @@ class Warga extends Equatable {
     this.rt,
     this.rw,
     this.rumahId,
+    this.kepemilikanRumah,
     this.fotoKtp,
     this.fotoKk,
     this.fotoProfil,
@@ -107,6 +111,7 @@ class Warga extends Equatable {
       agama: map['agama'] as String?,
       statusPerkawinan: map['status_perkawinan'] as String?,
       pekerjaan: map['pekerjaan'] as String?,
+      pendidikan: map['pendidikan'] as String?,
       noKk: map['no_kk'] as String?,
       statusKk: map['status_kk'] as String?,
       noHp: map['no_hp'] as String?,
@@ -114,6 +119,7 @@ class Warga extends Equatable {
       rt: map['rt'] as String?,
       rw: map['rw'] as String?,
       rumahId: map['rumah_id'] as int?,
+      kepemilikanRumah: map['kepemilikan_rumah'] as String?,
       fotoKtp: map['foto_ktp'] as String?,
       fotoKk: map['foto_kk'] as String?,
       fotoProfil: map['foto_profil'] as String?,
@@ -142,6 +148,7 @@ class Warga extends Equatable {
       'agama': agama,
       'status_perkawinan': statusPerkawinan,
       'pekerjaan': pekerjaan,
+      'pendidikan': pendidikan,
       'no_kk': noKk,
       'status_kk': statusKk,
       'no_hp': noHp,
@@ -149,6 +156,7 @@ class Warga extends Equatable {
       'rt': rt,
       'rw': rw,
       'rumah_id': rumahId,
+      'kepemilikan_rumah': kepemilikanRumah,
       'foto_ktp': fotoKtp,
       'foto_kk': fotoKk,
       'foto_profil': fotoProfil,
@@ -168,6 +176,7 @@ class Warga extends Equatable {
     String? agama,
     String? statusPerkawinan,
     String? pekerjaan,
+    String? pendidikan,
     String? noKk,
     String? statusKk,
     String? noHp,
@@ -175,6 +184,7 @@ class Warga extends Equatable {
     String? rt,
     String? rw,
     int? rumahId,
+    String? kepemilikanRumah,
     String? fotoKtp,
     String? fotoKk,
     String? fotoProfil,
@@ -191,6 +201,7 @@ class Warga extends Equatable {
       agama: agama ?? this.agama,
       statusPerkawinan: statusPerkawinan ?? this.statusPerkawinan,
       pekerjaan: pekerjaan ?? this.pekerjaan,
+      pendidikan: pendidikan ?? this.pendidikan,
       noKk: noKk ?? this.noKk,
       statusKk: statusKk ?? this.statusKk,
       noHp: noHp ?? this.noHp,
@@ -198,6 +209,7 @@ class Warga extends Equatable {
       rt: rt ?? this.rt,
       rw: rw ?? this.rw,
       rumahId: rumahId ?? this.rumahId,
+      kepemilikanRumah: kepemilikanRumah ?? this.kepemilikanRumah,
       fotoKtp: fotoKtp ?? this.fotoKtp,
       fotoKk: fotoKk ?? this.fotoKk,
       fotoProfil: fotoProfil ?? this.fotoProfil,

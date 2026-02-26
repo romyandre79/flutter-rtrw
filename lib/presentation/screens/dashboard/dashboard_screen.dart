@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_pos/core/theme/app_theme.dart';
+import 'package:flutter_pos/core/utils/currency_formatter.dart';
 import 'package:flutter_pos/data/models/user.dart';
 import 'package:flutter_pos/logic/cubits/auth/auth_cubit.dart';
 import 'package:flutter_pos/logic/cubits/auth/auth_state.dart';
 import 'package:flutter_pos/logic/cubits/dashboard/dashboard_cubit.dart';
 import 'package:flutter_pos/logic/cubits/dashboard/dashboard_state.dart';
+import 'package:flutter_pos/logic/cubits/pengurus/pengurus_cubit.dart';
+import 'package:flutter_pos/logic/cubits/iuran/iuran_cubit.dart';
+import 'package:flutter_pos/logic/cubits/pengeluaran/pengeluaran_cubit.dart';
+import 'package:flutter_pos/presentation/screens/pengurus/pengurus_list_screen.dart';
+import 'package:flutter_pos/presentation/screens/iuran/iuran_list_screen.dart';
+import 'package:flutter_pos/presentation/screens/pengeluaran/pengeluaran_list_screen.dart';
+import 'package:flutter_pos/presentation/screens/denah/denah_rt_screen.dart';
+import 'package:flutter_pos/logic/cubits/warga/warga_cubit.dart';
+import 'package:flutter_pos/presentation/screens/pengumuman/pengumuman_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  final Function(int)? onSwitchTab;
-  const DashboardScreen({super.key, this.onSwitchTab});
+  const DashboardScreen({super.key});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -31,7 +40,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           final user = authState is AuthAuthenticated ? authState.user : null;
 
           return RefreshIndicator(
-            onRefresh: () async => context.read<DashboardCubit>().loadDashboard(),
+            onRefresh: () async {
+              context.read<DashboardCubit>().loadDashboard();
+            },
             color: AppThemeColors.primary,
             child: ListView(
               children: [
@@ -41,6 +52,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      _buildFinancialSummary(),
+                      const SizedBox(height: AppSpacing.xl),
                       _buildQuickActions(),
                       const SizedBox(height: AppSpacing.xl),
                       _buildSummarySection(),
@@ -114,7 +127,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
-              // App description
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
@@ -153,6 +165,104 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  Widget _buildFinancialSummary() {
+    return BlocBuilder<DashboardCubit, DashboardState>(
+      builder: (context, state) {
+        double saldo = 0;
+        double iuran = 0;
+        double pengeluaran = 0;
+
+        if (state is DashboardLoaded) {
+          iuran = state.totalIuran;
+          pengeluaran = state.totalPengeluaran;
+          saldo = iuran - pengeluaran;
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Keuangan Bulan Ini',
+              style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                gradient: AppThemeColors.primaryGradient,
+                borderRadius: AppRadius.lgRadius,
+                boxShadow: AppShadows.medium,
+              ),
+              child: Column(
+                children: [
+                  Text('Saldo', style: AppTypography.bodySmall.copyWith(color: Colors.white70)),
+                  Text(
+                    CurrencyFormatter.format(saldo.toInt()),
+                    style: AppTypography.headlineLarge.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.arrow_downward, color: Color(0xFF69F0AE), size: 16),
+                            const SizedBox(width: 4),
+                            Text('Pemasukan', style: AppTypography.bodyMedium.copyWith(color: Colors.white)),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          CurrencyFormatter.format(iuran.toInt()),
+                          style: AppTypography.titleMedium.copyWith(
+                            color: const Color(0xFF69F0AE),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(width: 1, height: 40, color: Colors.white24),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.arrow_upward, color: Color(0xFFFF5252), size: 16),
+                            const SizedBox(width: 4),
+                            Text('Pengeluaran', style: AppTypography.bodyMedium.copyWith(color: Colors.white)),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          CurrencyFormatter.format(pengeluaran.toInt()),
+                          style: AppTypography.titleMedium.copyWith(
+                            color: const Color(0xFFFF5252),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+      },
+    );
+  }
+
   Widget _buildQuickActions() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,33 +272,94 @@ class _DashboardScreenState extends State<DashboardScreen> {
           style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: AppSpacing.md),
-        Row(
+        GridView.count(
+          crossAxisCount: 4,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: AppSpacing.sm,
+          crossAxisSpacing: AppSpacing.sm,
+          childAspectRatio: 0.85,
           children: [
-            Expanded(
-              child: _buildQuickActionItem(
-                icon: Icons.person_add,
-                label: 'Tambah Warga',
-                color: AppThemeColors.primary,
-                onTap: () => widget.onSwitchTab?.call(1),
-              ),
+            _buildQuickActionItem(
+              icon: Icons.admin_panel_settings,
+              label: 'Pengurus',
+              color: AppThemeColors.warning,
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider(
+                      create: (_) => PengurusCubit(),
+                      child: const PengurusListScreen(),
+                    ),
+                  ),
+                );
+                if (mounted) context.read<DashboardCubit>().loadDashboard();
+              },
             ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: _buildQuickActionItem(
-                icon: Icons.add_home,
-                label: 'Tambah Rumah',
-                color: AppThemeColors.success,
-                onTap: () => widget.onSwitchTab?.call(2),
-              ),
+            _buildQuickActionItem(
+              icon: Icons.receipt_long,
+              label: 'Iuran',
+              color: AppThemeColors.primary,
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider(
+                      create: (_) => IuranCubit(),
+                      child: const IuranListScreen(),
+                    ),
+                  ),
+                );
+                if (mounted) context.read<DashboardCubit>().loadDashboard();
+              },
             ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: _buildQuickActionItem(
-                icon: Icons.admin_panel_settings,
-                label: 'Pengurus',
-                color: AppThemeColors.warning,
-                onTap: () => widget.onSwitchTab?.call(3),
-              ),
+            _buildQuickActionItem(
+              icon: Icons.money_off,
+              label: 'Pengeluaran',
+              color: AppThemeColors.error,
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider(
+                      create: (_) => PengeluaranCubit(),
+                      child: const PengeluaranListScreen(),
+                    ),
+                  ),
+                );
+                if (mounted) context.read<DashboardCubit>().loadDashboard();
+              },
+            ),
+            _buildQuickActionItem(
+              icon: Icons.map_outlined,
+              label: 'Denah Lingkungan',
+              color: AppThemeColors.success,
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const DenahRtScreen(),
+                  ),
+                );
+                if (mounted) context.read<DashboardCubit>().loadDashboard();
+              },
+            ),
+            _buildQuickActionItem(
+              icon: Icons.campaign,
+              label: 'Pengumuman',
+              color: Colors.blueAccent,
+              onTap: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider(
+                      create: (_) => WargaCubit(),
+                      child: const PengumumanScreen(),
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -205,24 +376,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: AppRadius.lgRadius,
           boxShadow: AppShadows.small,
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 48,
-              height: 48,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.1),
                 borderRadius: AppRadius.mdRadius,
               ),
-              child: Icon(icon, color: color, size: 24),
+              child: Icon(icon, color: color, size: 22),
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               label,
               style: AppTypography.labelSmall.copyWith(fontWeight: FontWeight.w600),
@@ -270,14 +442,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     label: 'Total Warga Aktif',
                     value: totalWarga.toString(),
                     color: AppThemeColors.primary,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  _buildStatCard(
-                    icon: Icons.home,
-                    label: 'Total Rumah',
-                    value: totalRumah.toString(),
-                    color: AppThemeColors.success,
-                  ),
+                  ),                  
                   const SizedBox(height: AppSpacing.sm),
                   _buildStatCard(
                     icon: Icons.admin_panel_settings,

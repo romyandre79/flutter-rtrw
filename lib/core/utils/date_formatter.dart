@@ -11,14 +11,14 @@ class DateFormatter {
     }
   }
 
-  /// Format: 15 Jan 2026
+  /// Format: 15 Januari 2026
   static String formatDate(DateTime date) {
-    return DateFormat('dd MMM yyyy', 'id_ID').format(date);
+    return DateFormat('dd MMMM yyyy', 'id_ID').format(date);
   }
 
-  /// Format: 15 Jan 2026 14:30
+  /// Format: 15 Januari 2026 14:30
   static String formatDateTime(DateTime date) {
-    return DateFormat('dd MMM yyyy HH:mm', 'id_ID').format(date);
+    return DateFormat('dd MMMM yyyy HH:mm', 'id_ID').format(date);
   }
 
   /// Format: 15/01/26

@@ -2,13 +2,13 @@ class AppConstants {
   AppConstants._();
 
   // App Info
-  static const String appName = 'Kreatif MajuMU - RT RW';
+  static const String appName = 'Kreatif - Wargamu';
   static const String appVersion = '1.0.0';
   static const String appDescription = 'Aplikasi Kreatif RT/RW - Full, Jalan Tanpa Internet!';
 
   // Database
   static const String databaseName = 'kreatifrtwrw.db';
-  static const int databaseVersion = 7;
+  static const int databaseVersion = 11;
 
   // Surat Keluar
   static const String defaultSuratKeluarPrefix = 'SKel';
@@ -55,6 +55,9 @@ class AppConstants {
   static const String keyPlantAddress = 'plant_address';
   static const String keyPlantCode = 'plant_code';
   static const String keyMachineNumber = 'machine_number';
+
+  // Specific Settings Keys
+  static const String keyIuranBulanan = 'iuran_bulanan';
 
   // Default RT/RW Info
   static const String defaultRTName = 'RT 01';

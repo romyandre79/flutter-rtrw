@@ -23,9 +23,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     OnboardingData(
       icon: Icons.store,
       title: 'Selamat Datang!',
-      subtitle: 'Aplikasi Kasir',
+      subtitle: 'Aplikasi Kreatif RT/RW',
       description:
-          'Aplikasi kasir modern untuk UMKM Indonesia.\nKelola bisnis Anda dengan mudah, cepat, dan profesional.',
+          'Aplikasi RT/RW modern untuk Pelayanan Masyarakat.\nKelola lingkungan Anda dengan mudah, cepat, dan profesional.',
       gradient: const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
@@ -41,7 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       title: 'Fitur Lengkap',
       subtitle: 'Semua dalam Satu Aplikasi',
       description:
-          'Kelola order, data pelanggan, paket layanan,\nlaporan penjualan, dan cetak struk thermal.\nSatu aplikasi untuk semua kebutuhan bisnis Anda.',
+          'Kelola data pelanggan, surat menyurat, iuran bulanan, pengeluaran,\nlaporan bulanan.\nSatu aplikasi untuk semua kebutuhan RT/RW Anda.',
       gradient: const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
@@ -404,7 +404,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         ],
       ),
       child: Image.asset(
-        'assets/icons/logopos.png',
+        'assets/icons/logortrw.png',
         fit: BoxFit.contain,
       ),
     );

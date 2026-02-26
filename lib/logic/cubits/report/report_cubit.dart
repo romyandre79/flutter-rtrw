@@ -1,17 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_pos/data/repositories/report_repository.dart';
-import 'package:flutter_pos/core/services/export_service.dart';
 import 'package:flutter_pos/logic/cubits/report/report_state.dart';
 
 class ReportCubit extends Cubit<ReportState> {
   final ReportRepository _reportRepository;
-  final ExportService _exportService;
 
   ReportCubit({
     ReportRepository? reportRepository,
-    ExportService? exportService,
   })  : _reportRepository = reportRepository ?? ReportRepository(),
-        _exportService = exportService ?? ExportService(),
         super(const ReportInitial());
 
   /// Load report data
@@ -23,32 +19,6 @@ class ReportCubit extends Cubit<ReportState> {
       emit(ReportLoaded(data: data));
     } catch (e) {
       emit(ReportError(e.toString().replaceAll('Exception: ', '')));
-    }
-  }
-
-  /// Export report to Excel (Summary)
-  Future<void> exportToExcel() async {
-    final currentState = state;
-    if (currentState is! ReportLoaded) return;
-
-    emit(const ReportExporting());
-
-    try {
-      final filePath = await _exportService.exportReportToExcel(
-        currentState.data,
-      );
-
-      await _exportService.shareFile(filePath);
-
-      emit(ReportExported(
-        filePath: filePath,
-        message: 'Laporan berhasil di-export',
-      ));
-
-      emit(currentState);
-    } catch (e) {
-      emit(ReportError(e.toString().replaceAll('Exception: ', '')));
-      emit(currentState);
     }
   }
 }
