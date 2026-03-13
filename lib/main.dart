@@ -19,11 +19,13 @@ import 'package:flutter_pos/data/repositories/unit_repository.dart';
 import 'package:flutter_pos/data/repositories/warga_repository.dart';
 import 'package:flutter_pos/data/repositories/rumah_repository.dart';
 import 'package:flutter_pos/data/repositories/pengurus_repository.dart';
+import 'package:flutter_pos/data/repositories/pengumuman_template_repository.dart';
 import 'package:flutter_pos/core/api/api_service.dart';
 import 'package:flutter_pos/core/services/notification_service.dart';
 import 'package:flutter_pos/core/services/sync_service.dart';
 import 'package:flutter_pos/logic/sync/sync_cubit.dart';
 import 'package:flutter_pos/logic/cubits/unit/unit_cubit.dart';
+import 'package:flutter_pos/logic/cubits/pengumuman_template/pengumuman_template_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,6 +71,7 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(create: (_) => WargaRepository()),
         RepositoryProvider(create: (_) => RumahRepository()),
         RepositoryProvider(create: (_) => PengurusRepository()),
+        RepositoryProvider(create: (_) => PengumumanTemplateRepository()),
         RepositoryProvider(create: (_) => ApiService()),
         RepositoryProvider(
           create: (context) => SyncService(
@@ -92,6 +95,11 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => UnitCubit(
               context.read<UnitRepository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => PengumumanTemplateCubit(
+              context.read<PengumumanTemplateRepository>(),
             ),
           ),
         ],

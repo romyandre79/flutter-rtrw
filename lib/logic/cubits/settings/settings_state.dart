@@ -7,6 +7,7 @@ class StoreInfo {
   final String invoicePrefix;
   final String machineNumber;
   final double iuranBulanan;
+  final String fonnteToken;
 
   const StoreInfo({
     required this.name,
@@ -15,6 +16,7 @@ class StoreInfo {
     required this.invoicePrefix,
     required this.machineNumber,
     this.iuranBulanan = 0,
+    this.fonnteToken = '',
   });
 
   StoreInfo copyWith({
@@ -24,6 +26,7 @@ class StoreInfo {
     String? invoicePrefix,
     String? machineNumber,
     double? iuranBulanan,
+    String? fonnteToken,
   }) {
     return StoreInfo(
       name: name ?? this.name,
@@ -32,6 +35,7 @@ class StoreInfo {
       invoicePrefix: invoicePrefix ?? this.invoicePrefix,
       machineNumber: machineNumber ?? this.machineNumber,
       iuranBulanan: iuranBulanan ?? this.iuranBulanan,
+      fonnteToken: fonnteToken ?? this.fonnteToken,
     );
   }
 }

@@ -34,6 +34,7 @@ class SettingsCubit extends Cubit<SettingsState> {
         machineNumber: settings[AppConstants.keyMachineNumber] ??
             AppConstants.defaultMachineNumber,
         iuranBulanan: double.tryParse(settings[AppConstants.keyIuranBulanan] ?? '0') ?? 0,
+        fonnteToken: settings[AppConstants.keyFonnteToken] ?? '',
       );
 
       final plantInfo = PlantInfo(
@@ -258,6 +259,27 @@ class SettingsCubit extends Cubit<SettingsState> {
     } catch (e) {
       emit(SettingsError(
           message: 'Gagal memperbarui Iuran Bulanan: ${e.toString()}'));
+    }
+  }
+
+  Future<void> updateFonnteToken(String token) async {
+    emit(SettingsUpdating());
+
+    try {
+      await _repository.setSetting(
+          AppConstants.keyFonnteToken, token.trim());
+
+      final updatedInfo = _currentInfo!.copyWith(fonnteToken: token.trim());
+      _currentInfo = updatedInfo;
+
+      emit(SettingsUpdated(
+        message: 'Fonnte API Token berhasil diperbarui',
+        storeInfo: updatedInfo,
+        plantInfo: _currentPlantInfo,
+      ));
+    } catch (e) {
+      emit(SettingsError(
+          message: 'Gagal memperbarui Fonnte Token: ${e.toString()}'));
     }
   }
 }

@@ -736,6 +736,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       _settingsCubit.updateInvoicePrefix(value),
                                 ),
                               ),
+                              _buildSettingTile(
+                                context: context,
+                                icon: Icons.message,
+                                title: 'Fonnte API Token',
+                                subtitle: storeInfo?.fonnteToken.isNotEmpty == true
+                                    ? 'Token terisi'
+                                    : 'Akses API WhatsApp Gateway',
+                                onTap: () => _showEditDialog(
+                                  title: 'Edit Fonnte API Token',
+                                  currentValue: storeInfo?.fonnteToken ?? '',
+                                  hint: 'Masukkan Fonnte API Token',
+                                  icon: Icons.message,
+                                  onSave: (value) =>
+                                      _settingsCubit.updateFonnteToken(value),
+                                ),
+                              ),
                               _buildDivider(),
                               _buildSettingTile(
                                 context: context,

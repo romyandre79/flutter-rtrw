@@ -15,6 +15,7 @@ import 'package:flutter_pos/presentation/screens/iuran/iuran_list_screen.dart';
 import 'package:flutter_pos/presentation/screens/pengeluaran/pengeluaran_list_screen.dart';
 import 'package:flutter_pos/presentation/screens/denah/denah_rt_screen.dart';
 import 'package:flutter_pos/logic/cubits/warga/warga_cubit.dart';
+import 'package:flutter_pos/logic/cubits/settings/settings_cubit.dart';
 import 'package:flutter_pos/presentation/screens/pengumuman/pengumuman_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -353,8 +354,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => BlocProvider(
-                      create: (_) => WargaCubit(),
+                    builder: (_) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider(create: (_) => WargaCubit()),
+                        BlocProvider(create: (_) => SettingsCubit()..loadSettings()),
+                      ],
                       child: const PengumumanScreen(),
                     ),
                   ),

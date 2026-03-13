@@ -181,6 +181,17 @@ class DatabaseHelper {
         FOREIGN KEY (rumah_id) REFERENCES rumah(id) ON DELETE SET NULL
       )
     ''');
+    
+    // Pengumuman Template table
+    await db.execute('''
+      CREATE TABLE pengumuman_template (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        judul TEXT,
+        isi TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    ''');
 
     await _createIndexes(db);
     await _seedData(db);
@@ -243,6 +254,7 @@ class DatabaseHelper {
       AppConstants.keyPrinterAddress: '',
       AppConstants.keyLastInvoiceDate: '',
       AppConstants.keyLastInvoiceNumber: '0',
+      AppConstants.keyFonnteToken: '',
     };
 
     for (final entry in settings.entries) {
@@ -348,6 +360,19 @@ class DatabaseHelper {
       } catch (e) {
         // Ignore if exists
       }
+    }
+
+    if (oldVersion < 12) {
+      // Create pengumuman_template table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS pengumuman_template (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          judul TEXT,
+          isi TEXT NOT NULL,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      ''');
     }
   }
 
