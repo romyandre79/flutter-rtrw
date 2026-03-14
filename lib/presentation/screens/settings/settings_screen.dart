@@ -602,6 +602,119 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ],
                           ),
 
+                          // App Settings Section
+                          _buildSection(
+                            title: 'Pengaturan Aplikasi',
+                            children: [
+                              _buildSettingTile(
+                                context: context,
+                                icon: Icons.receipt,
+                                title: 'Prefix Invoice',
+                                subtitle:
+                                    storeInfo?.invoicePrefix ??
+                                    AppConstants.defaultInvoicePrefix,
+                                onTap: () => _showEditDialog(
+                                  title: 'Edit Prefix Invoice',
+                                  currentValue:
+                                      storeInfo?.invoicePrefix ??
+                                      AppConstants.defaultInvoicePrefix,
+                                  hint: 'Masukkan prefix (maks 10 karakter)',
+                                  icon: Icons.receipt,
+                                  maxLength: 10,
+                                  onSave: (value) =>
+                                      _settingsCubit.updateInvoicePrefix(value),
+                                ),
+                              ),
+                              _buildSettingTile(
+                                context: context,
+                                icon: Icons.message,
+                                title: 'Fonnte API Token',
+                                subtitle: storeInfo?.fonnteToken.isNotEmpty == true
+                                    ? 'Token terisi'
+                                    : 'Akses API WhatsApp Gateway',
+                                onTap: () => _showEditDialog(
+                                  title: 'Edit Fonnte API Token',
+                                  currentValue: storeInfo?.fonnteToken ?? '',
+                                  hint: 'Masukkan Fonnte API Token',
+                                  icon: Icons.message,
+                                  onSave: (value) =>
+                                      _settingsCubit.updateFonnteToken(value),
+                                ),
+                              ),
+                              _buildDivider(),
+                              _buildSettingTile(
+                                context: context,
+                                icon: Icons.confirmation_number,
+                                title: 'Machine Number',
+                                subtitle:
+                                    storeInfo?.machineNumber ??
+                                    AppConstants.defaultMachineNumber,
+                                onTap: () => _showEditDialog(
+                                  title: 'Edit Machine Number',
+                                  currentValue:
+                                      storeInfo?.machineNumber ??
+                                      AppConstants.defaultMachineNumber,
+                                  hint: 'Masukkan nomor mesin (misal: 01)',
+                                  icon: Icons.confirmation_number,
+                                  maxLength: 5,
+                                  onSave: (value) =>
+                                      _settingsCubit.updateMachineNumber(value),
+                                ),
+                              ),
+                              _buildDivider(),
+                              _buildSettingTile(
+                                context: context,
+                                icon: Icons.print,
+                                title: 'Pengaturan Printer',
+                                subtitle: 'Atur koneksi printer thermal',
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => BlocProvider(
+                                        create: (_) => PrinterCubit(),
+                                        child: const PrinterSettingsScreen(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+
+                          // User Management Section
+                          if (user != null && user.role == UserRole.owner)
+                          _buildSection(
+                            title: 'Manajemen User',
+                            children: [
+                              _buildSettingTile(
+                                context: context,
+                                icon: Icons.people,
+                                title: 'Kelola User',
+                                subtitle: 'Tambah, edit, atau hapus user',
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => BlocProvider(
+                                        create: (_) => UserCubit(),
+                                        child: const UserManagementScreen(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              _buildDivider(),
+                              _buildSettingTile(
+                                context: context,
+                                icon: Icons.lock,
+                                title: 'Ubah Password',
+                                subtitle: 'Ganti password akun Anda',
+                                onTap: () => _showChangePasswordDialog(context),
+                              ),
+                            ],
+                          ),
+
                           // Data Management Section (Owner only)
                           if (user != null && user.role == UserRole.owner)
                             _buildSection(
@@ -712,118 +825,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                               ],
                             ),
-
-                          // App Settings Section
-                          _buildSection(
-                            title: 'Pengaturan Aplikasi',
-                            children: [
-                              _buildSettingTile(
-                                context: context,
-                                icon: Icons.receipt,
-                                title: 'Prefix Invoice',
-                                subtitle:
-                                    storeInfo?.invoicePrefix ??
-                                    AppConstants.defaultInvoicePrefix,
-                                onTap: () => _showEditDialog(
-                                  title: 'Edit Prefix Invoice',
-                                  currentValue:
-                                      storeInfo?.invoicePrefix ??
-                                      AppConstants.defaultInvoicePrefix,
-                                  hint: 'Masukkan prefix (maks 10 karakter)',
-                                  icon: Icons.receipt,
-                                  maxLength: 10,
-                                  onSave: (value) =>
-                                      _settingsCubit.updateInvoicePrefix(value),
-                                ),
-                              ),
-                              _buildSettingTile(
-                                context: context,
-                                icon: Icons.message,
-                                title: 'Fonnte API Token',
-                                subtitle: storeInfo?.fonnteToken.isNotEmpty == true
-                                    ? 'Token terisi'
-                                    : 'Akses API WhatsApp Gateway',
-                                onTap: () => _showEditDialog(
-                                  title: 'Edit Fonnte API Token',
-                                  currentValue: storeInfo?.fonnteToken ?? '',
-                                  hint: 'Masukkan Fonnte API Token',
-                                  icon: Icons.message,
-                                  onSave: (value) =>
-                                      _settingsCubit.updateFonnteToken(value),
-                                ),
-                              ),
-                              _buildDivider(),
-                              _buildSettingTile(
-                                context: context,
-                                icon: Icons.confirmation_number,
-                                title: 'Machine Number',
-                                subtitle:
-                                    storeInfo?.machineNumber ??
-                                    AppConstants.defaultMachineNumber,
-                                onTap: () => _showEditDialog(
-                                  title: 'Edit Machine Number',
-                                  currentValue:
-                                      storeInfo?.machineNumber ??
-                                      AppConstants.defaultMachineNumber,
-                                  hint: 'Masukkan nomor mesin (misal: 01)',
-                                  icon: Icons.confirmation_number,
-                                  maxLength: 5,
-                                  onSave: (value) =>
-                                      _settingsCubit.updateMachineNumber(value),
-                                ),
-                              ),
-                              _buildDivider(),
-                              _buildSettingTile(
-                                context: context,
-                                icon: Icons.print,
-                                title: 'Pengaturan Printer',
-                                subtitle: 'Atur koneksi printer thermal',
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => BlocProvider(
-                                        create: (_) => PrinterCubit(),
-                                        child: const PrinterSettingsScreen(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-
-                          // User Management Section
-                          _buildSection(
-                            title: 'Manajemen User',
-                            children: [
-                              _buildSettingTile(
-                                context: context,
-                                icon: Icons.people,
-                                title: 'Kelola User',
-                                subtitle: 'Tambah, edit, atau hapus user',
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => BlocProvider(
-                                        create: (_) => UserCubit(),
-                                        child: const UserManagementScreen(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              _buildDivider(),
-                              _buildSettingTile(
-                                context: context,
-                                icon: Icons.lock,
-                                title: 'Ubah Password',
-                                subtitle: 'Ganti password akun Anda',
-                                onTap: () => _showChangePasswordDialog(context),
-                              ),
-                            ],
-                          ),
 
                           // About Section
                           _buildSection(
