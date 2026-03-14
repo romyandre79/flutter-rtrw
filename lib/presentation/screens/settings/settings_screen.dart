@@ -506,21 +506,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                           // Store Info Section
                           _buildSection(
-                            title: 'Informasi Toko',
+                            title: 'Informasi RT/RW',
                             children: [
                               _buildSettingTile(
                                 context: context,
                                 icon: Icons.store,
-                                title: 'Nama RT',
+                                title: 'Nama RT/RW',
                                 subtitle:
                                     storeInfo?.name ??
                                     AppConstants.defaultStoreName,
                                 onTap: () => _showEditDialog(
-                                  title: 'Edit Nama Toko',
+                                  title: 'Edit Nama RT/RW',
                                   currentValue:
                                       storeInfo?.name ??
                                       AppConstants.defaultStoreName,
-                                  hint: 'Masukkan nama toko',
+                                  hint: 'Masukkan nama RT/RW',
                                   icon: Icons.store,
                                   onSave: (value) =>
                                       _settingsCubit.updateStoreName(value),
@@ -530,16 +530,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               _buildSettingTile(
                                 context: context,
                                 icon: Icons.location_on,
-                                title: 'Alamat',
+                                title: 'Alamat RT/RW',
                                 subtitle:
                                     storeInfo?.address ??
                                     AppConstants.defaultStoreAddress,
                                 onTap: () => _showEditDialog(
-                                  title: 'Edit Alamat',
+                                  title: 'Edit Alamat RT/RW',
                                   currentValue:
                                       storeInfo?.address ??
                                       AppConstants.defaultStoreAddress,
-                                  hint: 'Masukkan alamat toko',
+                                  hint: 'Masukkan alamat RT/RW',
                                   icon: Icons.location_on,
                                   maxLines: 2,
                                   onSave: (value) => _settingsCubit
