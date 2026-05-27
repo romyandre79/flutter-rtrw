@@ -9,6 +9,7 @@ import 'package:flutter_pos/core/constants/app_constants.dart';
 import 'package:flutter_pos/core/utils/date_formatter.dart';
 import 'package:flutter_pos/logic/cubits/iuran/iuran_cubit.dart';
 import 'package:flutter_pos/logic/cubits/iuran/iuran_state.dart';
+import 'package:flutter_pos/presentation/widgets/searchable_warga_picker.dart';
 
 class IuranFormScreen extends StatefulWidget {
   final Iuran? iuran;
@@ -96,49 +97,7 @@ class _IuranFormScreenState extends State<IuranFormScreen> {
     context.read<IuranCubit>().save(iuran);
   }
 
-  Future<void> _pickWarga() async {
-    final wargaList = await _wargaRepo.getAll(status: 'aktif');
-    if (!mounted) return;
 
-    final selected = await showDialog<Warga>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Pilih Warga'),
-        content: SizedBox(
-          width: double.maxFinite,
-          height: 400,
-          child: wargaList.isEmpty
-              ? const Center(child: Text('Belum ada data warga'))
-              : ListView.builder(
-                  itemCount: wargaList.length,
-                  itemBuilder: (context, index) {
-                    final w = wargaList[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: AppThemeColors.primarySurface,
-                        child: Text(w.nama[0], style: const TextStyle(color: AppThemeColors.primary)),
-                      ),
-                      title: Text(w.nama),
-                      subtitle: w.noHp != null ? Text(w.noHp!) : null,
-                      selected: w.id == _selectedWargaId,
-                      onTap: () => Navigator.pop(context, w),
-                    );
-                  },
-                ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
-        ],
-      ),
-    );
-
-    if (selected != null) {
-      setState(() {
-        _selectedWargaId = selected.id;
-        _selectedWargaNama = selected.nama;
-      });
-    }
-  }
 
   Future<void> _pickTanggalBayar() async {
     final picked = await showDatePicker(
@@ -185,13 +144,18 @@ class _IuranFormScreenState extends State<IuranFormScreen> {
           child: ListView(
             padding: const EdgeInsets.all(AppSpacing.lg),
             children: [
-              _sectionTitle('Warga'),
-              const SizedBox(height: AppSpacing.md),
-              _buildPicker(
-                icon: Icons.person,
-                label: _selectedWargaNama ?? 'Pilih Warga',
-                hasValue: _selectedWargaId != null,
-                onTap: _pickWarga,
+              SearchableWargaPicker(
+                selectedWarga: _selectedWargaId != null 
+                    ? Warga(id: _selectedWargaId, nama: _selectedWargaNama ?? '') 
+                    : null,
+                onWargaSelected: (warga) {
+                  setState(() {
+                    _selectedWargaId = warga?.id;
+                    _selectedWargaNama = warga?.nama;
+                  });
+                },
+                label: 'Pilih Warga',
+                hint: 'Cari nama warga...',
               ),
 
               const SizedBox(height: AppSpacing.xl),

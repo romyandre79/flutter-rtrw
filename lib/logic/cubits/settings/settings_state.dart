@@ -8,6 +8,11 @@ class StoreInfo {
   final String machineNumber;
   final double iuranBulanan;
   final String fonnteToken;
+  final String deviceId;
+  final String branchId;
+  final String branchCode;
+  final String customerName;
+  final String customerWa;
 
   const StoreInfo({
     required this.name,
@@ -17,6 +22,11 @@ class StoreInfo {
     required this.machineNumber,
     this.iuranBulanan = 0,
     this.fonnteToken = '',
+    this.deviceId = '',
+    this.branchId = '',
+    this.branchCode = '',
+    this.customerName = '',
+    this.customerWa = '',
   });
 
   StoreInfo copyWith({
@@ -27,6 +37,11 @@ class StoreInfo {
     String? machineNumber,
     double? iuranBulanan,
     String? fonnteToken,
+    String? deviceId,
+    String? branchId,
+    String? branchCode,
+    String? customerName,
+    String? customerWa,
   }) {
     return StoreInfo(
       name: name ?? this.name,
@@ -36,6 +51,11 @@ class StoreInfo {
       machineNumber: machineNumber ?? this.machineNumber,
       iuranBulanan: iuranBulanan ?? this.iuranBulanan,
       fonnteToken: fonnteToken ?? this.fonnteToken,
+      deviceId: deviceId ?? this.deviceId,
+      branchId: branchId ?? this.branchId,
+      branchCode: branchCode ?? this.branchCode,
+      customerName: customerName ?? this.customerName,
+      customerWa: customerWa ?? this.customerWa,
     );
   }
 }

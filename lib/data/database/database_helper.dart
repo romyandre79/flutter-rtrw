@@ -175,14 +175,12 @@ class DatabaseHelper {
       )
     ''');
     
-    // Pengumuman Template table
+    // Units table
     await db.execute('''
-      CREATE TABLE pengumuman_template (
+      CREATE TABLE units (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        judul TEXT,
-        isi TEXT NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        name TEXT UNIQUE NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     ''');
 
@@ -255,6 +253,12 @@ class DatabaseHelper {
         'key': entry.key,
         'value': entry.value,
       });
+    }
+
+    // Seed default units
+    final defaultUnits = ['pcs', 'kg', 'box', 'liter', 'ls', 'unit'];
+    for (final unit in defaultUnits) {
+      await db.insert('units', {'name': unit});
     }
   }
 
@@ -366,6 +370,26 @@ class DatabaseHelper {
           updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
       ''');
+    }
+
+    if (oldVersion < 13) {
+      // Add units table
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS units (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT UNIQUE NOT NULL,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      ''');
+
+      // Seed default units if table was just created
+      final count = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM units'));
+      if (count == 0 || count == null) {
+        final defaultUnits = ['pcs', 'kg', 'box', 'liter', 'ls', 'unit'];
+        for (final unit in defaultUnits) {
+          await db.insert('units', {'name': unit});
+        }
+      }
     }
   }
 

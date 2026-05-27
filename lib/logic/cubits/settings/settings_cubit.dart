@@ -282,4 +282,80 @@ class SettingsCubit extends Cubit<SettingsState> {
           message: 'Gagal memperbarui Fonnte Token: ${e.toString()}'));
     }
   }
+
+  Future<void> updateBranchId(String branchId) async {
+    emit(SettingsUpdating());
+
+    try {
+      await _repository.setSetting(AppConstants.keyBranchId, branchId.trim());
+
+      final updatedInfo = _currentInfo!.copyWith(branchId: branchId.trim());
+      _currentInfo = updatedInfo;
+
+      emit(SettingsUpdated(
+        message: 'ID Cabang berhasil diperbarui',
+        storeInfo: updatedInfo,
+      ));
+    } catch (e) {
+      emit(SettingsError(
+          message: 'Gagal memperbarui ID Cabang: ${e.toString()}'));
+    }
+  }
+
+  Future<void> updateBranchCode(String branchCode) async {
+    emit(SettingsUpdating());
+
+    try {
+      await _repository.setSetting(AppConstants.keyBranchCode, branchCode.trim());
+
+      final updatedInfo = _currentInfo!.copyWith(branchCode: branchCode.trim());
+      _currentInfo = updatedInfo;
+
+      emit(SettingsUpdated(
+        message: 'Kode Cabang berhasil diperbarui',
+        storeInfo: updatedInfo,
+      ));
+    } catch (e) {
+      emit(SettingsError(
+          message: 'Gagal memperbarui Kode Cabang: ${e.toString()}'));
+    }
+  }
+
+  Future<void> updateCustomerName(String customerName) async {
+    emit(SettingsUpdating());
+
+    try {
+      await _repository.setSetting(AppConstants.keyCustomerName, customerName.trim());
+
+      final updatedInfo = _currentInfo!.copyWith(customerName: customerName.trim());
+      _currentInfo = updatedInfo;
+
+      emit(SettingsUpdated(
+        message: 'Nama Customer berhasil diperbarui',
+        storeInfo: updatedInfo,
+      ));
+    } catch (e) {
+      emit(SettingsError(
+          message: 'Gagal memperbarui Nama Customer: ${e.toString()}'));
+    }
+  }
+
+  Future<void> updateCustomerWa(String customerWa) async {
+    emit(SettingsUpdating());
+
+    try {
+      await _repository.setSetting(AppConstants.keyCustomerWa, customerWa.trim());
+
+      final updatedInfo = _currentInfo!.copyWith(customerWa: customerWa.trim());
+      _currentInfo = updatedInfo;
+
+      emit(SettingsUpdated(
+        message: 'No WA Customer berhasil diperbarui',
+        storeInfo: updatedInfo,
+      ));
+    } catch (e) {
+      emit(SettingsError(
+          message: 'Gagal memperbarui No WA Customer: ${e.toString()}'));
+    }
+  }
 }

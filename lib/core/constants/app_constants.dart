@@ -8,7 +8,7 @@ class AppConstants {
 
   // Database
   static const String databaseName = 'kreatifrtwrw.db';
-  static const int databaseVersion = 12;
+  static const int databaseVersion = 13;
 
   // Surat Keluar
   static const String defaultSuratKeluarPrefix = 'SKel';
@@ -49,6 +49,10 @@ class AppConstants {
   static const String keyLastInvoiceDate = 'last_invoice_date';
 
   static const String keyLastInvoiceNumber = 'last_invoice_number';
+  static const String keyBranchId = 'branch_id';
+  static const String keyBranchCode = 'branch_code';
+  static const String keyCustomerName = 'customer_name';
+  static const String keyCustomerWa = 'customer_wa';
 
   // Plant Settings Keys
   static const String keyPlantName = 'plant_name';

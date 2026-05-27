@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,6 +20,7 @@ import 'package:flutter_pos/logic/sync/sync_state.dart';
 import 'package:flutter_pos/core/api/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_pos/data/services/database_service.dart';
+import 'package:flutter_pos/presentation/screens/unit/unit_list_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -483,123 +485,124 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           // Server Sync Section
                           _buildSection(
                             title: 'Server Sync',
-                            children: [
-                              _buildSettingTile(
-                                context: context,
-                                icon: Icons.cloud,
-                                title: 'Server URL',
-                                subtitle: 'Atur URL server untuk sinkronisasi',
-                                onTap: _showServerUrlDialog,
-                              ),
-                              _buildDivider(),
-                              _buildSettingTile(
-                                context: context,
-                                icon: Icons.sync,
-                                title: 'Sync Data',
-                                subtitle: 'Upload transaksi & download master data',
-                                onTap: () {
-                                  context.read<SyncCubit>().syncData();
-                                },
-                              ),
-                            ],
-                          ),
-
-                          // Store Info Section
-                          _buildSection(
-                            title: 'Informasi RT/RW',
-                            children: [
-                              _buildSettingTile(
+                            children: [                              _buildSettingTile(
                                 context: context,
                                 icon: Icons.store,
-                                title: 'Nama RT/RW',
-                                subtitle:
-                                    storeInfo?.name ??
-                                    AppConstants.defaultStoreName,
-                                onTap: () => _showEditDialog(
-                                  title: 'Edit Nama RT/RW',
-                                  currentValue:
-                                      storeInfo?.name ??
-                                      AppConstants.defaultStoreName,
-                                  hint: 'Masukkan nama RT/RW',
+                                title: 'Nama Toko / Klinik',
+                                subtitle: storeInfo?.name ?? AppConstants.defaultStoreName,
+                                locked: !AppConstants.isDemoMode,
+                                onTap: AppConstants.isDemoMode ? () => _showEditDialog(
+                                  title: 'Ubah Data Nama Toko / Klinik',
+                                  currentValue: storeInfo?.name ?? AppConstants.defaultStoreName,
+                                  hint: 'Masukkan nama',
                                   icon: Icons.store,
-                                  onSave: (value) =>
-                                      _settingsCubit.updateStoreName(value),
-                                ),
+                                  onSave: (value) => _settingsCubit.updateStoreName(value),
+                                ) : null,
                               ),
                               _buildDivider(),
                               _buildSettingTile(
                                 context: context,
                                 icon: Icons.location_on,
-                                title: 'Alamat RT/RW',
-                                subtitle:
-                                    storeInfo?.address ??
-                                    AppConstants.defaultStoreAddress,
-                                onTap: () => _showEditDialog(
-                                  title: 'Edit Alamat RT/RW',
-                                  currentValue:
-                                      storeInfo?.address ??
-                                      AppConstants.defaultStoreAddress,
-                                  hint: 'Masukkan alamat RT/RW',
+                                title: 'Alamat',
+                                subtitle: storeInfo?.address ?? AppConstants.defaultStoreAddress,
+                                locked: !AppConstants.isDemoMode,
+                                onTap: AppConstants.isDemoMode ? () => _showEditDialog(
+                                  title: 'Ubah Data Alamat',
+                                  currentValue: storeInfo?.address ?? AppConstants.defaultStoreAddress,
+                                  hint: 'Masukkan alamat',
                                   icon: Icons.location_on,
                                   maxLines: 2,
-                                  onSave: (value) => _settingsCubit
-                                      .updateStoreAddress(value),
-                                ),
+                                  onSave: (value) => _settingsCubit.updateStoreAddress(value),
+                                ) : null,
                               ),
                               _buildDivider(),
                               _buildSettingTile(
                                 context: context,
                                 icon: Icons.phone,
                                 title: 'Nomor HP',
-                                subtitle:
-                                    storeInfo?.phone ??
-                                    AppConstants.defaultStorePhone,
-                                onTap: () => _showEditDialog(
-                                  title: 'Edit Nomor HP',
-                                  currentValue:
-                                      storeInfo?.phone ??
-                                      AppConstants.defaultStorePhone,
+                                subtitle: storeInfo?.phone ?? AppConstants.defaultStorePhone,
+                                locked: !AppConstants.isDemoMode,
+                                onTap: AppConstants.isDemoMode ? () => _showEditDialog(
+                                  title: 'Ubah Data Nomor HP',
+                                  currentValue: storeInfo?.phone ?? AppConstants.defaultStorePhone,
                                   hint: 'Masukkan nomor HP',
                                   icon: Icons.phone,
                                   keyboardType: TextInputType.phone,
-                                  onSave: (value) =>
-                                      _settingsCubit.updateStorePhone(value),
-                                ),
+                                  onSave: (value) => _settingsCubit.updateStorePhone(value),
+                                ) : null,
                               ),
-                              _buildDivider(),
-                              _buildSettingTile(
-                                  context: context,
-                                  icon: Icons.confirmation_number,
-                                  title: 'Kode RT',
-                                  subtitle: plantInfo?.code.isNotEmpty == true
-                                      ? plantInfo!.code
-                                      : '-',
-                                  onTap: () => _showEditDialog(
-                                    title: 'Edit Kode RT',
-                                    currentValue: plantInfo?.code ?? '',
-                                    hint: 'Masukkan Kode RT',
-                                    icon: Icons.confirmation_number,
-                                    onSave: (value) =>
-                                        _settingsCubit.updatePlantCode(value),
-                                  ),
-                                ),
                               _buildDivider(),
                               _buildSettingTile(
                                 context: context,
-                                icon: Icons.attach_money,
-                                title: 'Master Iuran Bulanan',
-                                subtitle: CurrencyFormatter.format(storeInfo?.iuranBulanan.toInt() ?? 0),
-                                onTap: () => _showEditDialog(
-                                  title: 'Edit Iuran Bulanan',
-                                  currentValue: storeInfo?.iuranBulanan.toInt().toString() ?? '0',
-                                  hint: 'Masukkan nominal iuran bulanan',
-                                  icon: Icons.attach_money,
-                                  keyboardType: TextInputType.number,
-                                  onSave: (value) => _settingsCubit
-                                      .updateIuranBulanan(double.tryParse(value) ?? 0),
-                                ),
+                                icon: Icons.badge_outlined,
+                                title: 'ID Cabang',
+                                subtitle: (storeInfo?.branchId == null || storeInfo!.branchId.isEmpty)
+                                    ? 'Belum diatur'
+                                    : storeInfo.branchId,
+                                locked: !AppConstants.isDemoMode,
+                                onTap: AppConstants.isDemoMode ? () => _showEditDialog(
+                                  title: 'Ubah Data ID Cabang',
+                                  currentValue: storeInfo?.branchId ?? '',
+                                  hint: 'Masukkan ID Cabang',
+                                  icon: Icons.badge_outlined,
+                                  onSave: (value) => _settingsCubit.updateBranchId(value),
+                                ) : null,
                               ),
-                            ],
+                              _buildDivider(),
+                              _buildSettingTile(
+                                context: context,
+                                icon: Icons.code,
+                                title: 'Kode Cabang',
+                                subtitle: (storeInfo?.branchCode == null || storeInfo!.branchCode.isEmpty)
+                                    ? 'Belum diatur'
+                                    : storeInfo.branchCode,
+                                locked: !AppConstants.isDemoMode,
+                                onTap: AppConstants.isDemoMode ? () => _showEditDialog(
+                                  title: 'Ubah Data Kode Cabang',
+                                  currentValue: storeInfo?.branchCode ?? '',
+                                  hint: 'Masukkan Kode Cabang',
+                                  icon: Icons.code,
+                                  onSave: (value) => _settingsCubit.updateBranchCode(value),
+                                ) : null,
+                              ),
+                              _buildDivider(),
+                              _buildSettingTile(
+                                context: context,
+                                icon: Icons.person_pin,
+                                title: 'Nama Customer',
+                                subtitle: (storeInfo?.customerName == null || storeInfo!.customerName.isEmpty)
+                                    ? 'Belum diatur'
+                                    : storeInfo.customerName,
+                                locked: !AppConstants.isDemoMode,
+                                onTap: AppConstants.isDemoMode ? () => _showEditDialog(
+                                  title: 'Ubah Nama Customer',
+                                  currentValue: storeInfo?.customerName ?? '',
+                                  hint: 'Masukkan Nama Customer',
+                                  icon: Icons.person_pin,
+                                  onSave: (value) => _settingsCubit.updateCustomerName(value),
+                                ) : null,
+                              ),
+                              _buildDivider(),
+                              _buildSettingTile(
+                                context: context,
+                                icon: Icons.chat_bubble_outline,
+                                title: 'No WA Customer',
+                                subtitle: (storeInfo?.customerWa == null || storeInfo!.customerWa.isEmpty)
+                                    ? 'Belum diatur'
+                                    : storeInfo.customerWa,
+                                locked: !AppConstants.isDemoMode,
+                                onTap: AppConstants.isDemoMode ? () => _showEditDialog(
+                                  title: 'Ubah No WA Customer',
+                                  currentValue: storeInfo?.customerWa ?? '',
+                                  hint: 'Masukkan No WA Customer',
+                                  icon: Icons.chat_bubble_outline,
+                                  keyboardType: TextInputType.phone,
+                                  onSave: (value) => _settingsCubit.updateCustomerWa(value),
+                                ) : null,
+                              ),
+                              _buildDivider(),
+                              _buildDeviceKeyTile(storeInfo?.deviceId ?? ''),
+],
                           ),
 
                           // App Settings Section
@@ -711,6 +714,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 title: 'Ubah Password',
                                 subtitle: 'Ganti password akun Anda',
                                 onTap: () => _showChangePasswordDialog(context),
+                              ),
+                              _buildDivider(),
+                               _buildSettingTile(
+                                context: context,
+                                icon: Icons.straighten,
+                                title: 'Master Satuan',
+                                subtitle: 'Atur satuan (pcs, kg, dll)',
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const UnitListScreen(),
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -1067,10 +1085,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppThemeColors.primarySurface,
+                  color: locked
+                      ? AppThemeColors.textSecondary.withValues(alpha: 0.08)
+                      : AppThemeColors.primarySurface,
                   borderRadius: AppRadius.smRadius,
                 ),
-                child: Icon(icon, color: AppThemeColors.primary, size: 20),
+                child: Icon(
+                  icon,
+                  color: locked ? AppThemeColors.textSecondary : AppThemeColors.primary,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
               // Text content
@@ -1101,7 +1125,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: AppThemeColors.primarySurface,
+                    color: locked
+                      ? AppThemeColors.textSecondary.withValues(alpha: 0.08)
+                      : AppThemeColors.primarySurface,
                     borderRadius: AppRadius.smRadius,
                   ),
                   child: const Icon(
@@ -1119,4 +1145,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 
 
+
+  Widget _buildDeviceKeyTile(String deviceId) {
+    final displayKey = deviceId.isEmpty ? 'Memuat...' : deviceId;
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color(0xFF6A1B9A).withValues(alpha: 0.1),
+              borderRadius: AppRadius.smRadius,
+            ),
+            child: const Icon(Icons.fingerprint, color: Color(0xFF6A1B9A), size: 20),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Device Key', style: AppTypography.titleSmall.copyWith(fontWeight: FontWeight.w500)),
+                Text(displayKey, style: AppTypography.bodySmall.copyWith(
+                  color: const Color(0xFF6A1B9A), fontWeight: FontWeight.w600, letterSpacing: 1.5,
+                )),
+              ],
+            ),
+          ),
+          if (deviceId.isNotEmpty)
+            InkWell(
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: deviceId));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Device Key disalin'), backgroundColor: Color(0xFF6A1B9A), duration: Duration(seconds: 2)),
+                );
+              },
+              borderRadius: AppRadius.smRadius,
+              child: Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6A1B9A).withValues(alpha: 0.1),
+                  borderRadius: AppRadius.smRadius,
+                ),
+                child: const Icon(Icons.copy_outlined, color: Color(0xFF6A1B9A), size: 14),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
